@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RMIT SAT — Prize Spin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --red:   #e61e2a;
+      --navy:  #0d1985;
+      --tbs:   #a0001b;
+      --scd:   #0d1985;
+      --sset:  #123c69;
+      --font:  'Be Vietnam Pro', sans-serif;
+      --card-h: 110px;
+      --col-vis: 5;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body { font-family: var(--font); background: #f0f2f8; color: var(--navy); }
+
+    /* ─────────────────────────────────────────────
+       VIEW SWITCHING
+    ───────────────────────────────────────────── */
+    .view { display: none; }
+    .view.active { display: flex; flex-direction: column; min-height: 100vh; }
+
+    /* ══════════════════════════════════════════════
+       POOL VIEW
+    ══════════════════════════════════════════════ */
+    #poolView { background: #f0f2f8; }
+
+    .topbar {
+      background: var(--navy); color: #fff;
+      padding: 14px 28px; display: flex; align-items: center; gap: 14px; flex-shrink: 0;
+    }
+    .topbar-brand { font-size: 1.1rem; font-weight: 900; }
+    .topbar-sub   { font-size: 0.75rem; opacity: 0.55; }
+
+    .pool-page { max-width: 680px; margin: 0 auto; padding: 32px 20px 60px; width: 100%; }
+
+    .pool-page h1 { font-size: 1.55rem; font-weight: 900; margin-bottom: 4px; }
+    .pool-page .sub { font-size: 0.86rem; opacity: 0.6; margin-bottom: 28px; }
+
+    /* Date row */
+    .date-bar {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+      background: #fff; border-radius: 16px; padding: 14px 18px;
+      box-shadow: 0 2px 12px rgba(13,25,133,0.07); margin-bottom: 20px;
+    }
+    .date-bar label { font-weight: 800; font-size: 0.88rem; }
+    .date-bar input[type=date] {
+      border: 2px solid rgba(13,25,133,0.18); border-radius: 10px;
+      padding: 7px 13px; font-family: var(--font); font-size: 0.88rem;
+      color: var(--navy); background: #fff; outline: none;
+    }
+    .date-bar input[type=date]:focus { border-color: var(--navy); }
+    .date-bar .pool-badge {
+      margin-left: auto; background: rgba(13,25,133,0.09); color: var(--navy);
+      border-radius: 20px; padding: 4px 12px; font-size: 0.78rem; font-weight: 800;
+    }
+
+    /* Pool card */
+    .pool-card {
+      background: #fff; border-radius: 20px; padding: 20px;
+      box-shadow: 0 2px 14px rgba(13,25,133,0.07); margin-bottom: 20px;
+    }
+    .pool-card-header {
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;
+    }
+    .pool-card-title { font-size: 0.92rem; font-weight: 900; }
+
+    .btn {
+      font-family: var(--font); font-weight: 800; border: none; border-radius: 50px;
+      cursor: pointer; transition: transform 0.12s, opacity 0.15s;
+    }
+    .btn:active { transform: scale(0.96); }
+    .btn:disabled { opacity: 0.38; pointer-events: none; }
+    .btn-primary { background: var(--navy); color: #fff; font-size: 0.9rem; padding: 10px 22px; }
+    .btn-red     { background: var(--red);  color: #fff; font-size: 0.9rem; padding: 10px 22px; }
+    .btn-ghost   { background: rgba(13,25,133,0.08); color: var(--navy); font-size: 0.9rem; padding: 10px 22px; }
+    .btn-sm      { font-size: 0.74rem; padding: 5px 12px; border-radius: 10px; }
+    .btn-add     { background: rgba(13,25,133,0.09); color: var(--navy); font-size: 0.82rem; padding: 7px 16px; }
+    .btn-edit    { background: rgba(13,25,133,0.08); color: var(--navy); }
+    .btn-remove  { background: rgba(230,30,42,0.1); color: var(--red); }
+    .btn-restore { background: rgba(13,25,133,0.08); color: var(--navy); }
+
+    .pool-list { display: flex; flex-direction: column; gap: 7px; max-height: 420px; overflow-y: auto; }
+    .pool-empty { text-align: center; padding: 32px 0; font-size: 0.84rem; opacity: 0.45; }
+
+    .entry-row {
+      display: flex; align-items: center; gap: 9px;
+      border-radius: 13px; padding: 10px 12px;
+      border: 1.5px solid rgba(13,25,133,0.08);
+      background: rgba(13,25,133,0.03);
+    }
+    .entry-row.is-excluded { opacity: 0.38; }
+    .persona-chip {
+      font-size: 0.64rem; font-weight: 900; letter-spacing: 0.05em;
+      border-radius: 7px; padding: 3px 8px; color: #fff; flex-shrink: 0;
+    }
+    .persona-chip.TBS  { background: var(--tbs); }
+    .persona-chip.SCD  { background: var(--scd); }
+    .persona-chip.SSET { background: var(--sset); }
+    .entry-name   { font-size: 0.85rem; font-weight: 800; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .entry-school { font-size: 0.72rem; opacity: 0.5; flex-shrink: 0; max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .entry-actions { display: flex; gap: 5px; flex-shrink: 0; }
+
+    /* Confirm bar */
+    .confirm-bar {
+      background: #fff; border-radius: 20px; padding: 18px 20px;
+      box-shadow: 0 2px 14px rgba(13,25,133,0.07);
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      flex-wrap: wrap;
+    }
+    .confirm-hint { font-size: 0.84rem; opacity: 0.65; }
+    .confirm-hint strong { color: var(--navy); opacity: 1; }
+    .btn-confirm {
+      background: linear-gradient(135deg, var(--red) 0%, #b50016 100%);
+      color: #fff; font-size: 1rem; padding: 13px 28px; font-weight: 900;
+      border-radius: 50px; border: none; cursor: pointer; font-family: var(--font);
+      transition: transform 0.12s, box-shadow 0.15s;
+      box-shadow: 0 4px 18px rgba(230,30,42,0.3);
+    }
+    .btn-confirm:hover  { transform: scale(1.03); box-shadow: 0 6px 24px rgba(230,30,42,0.4); }
+    .btn-confirm:active { transform: scale(0.97); }
+    .btn-confirm:disabled { opacity: 0.38; pointer-events: none; box-shadow: none; }
+
+    /* ══════════════════════════════════════════════
+       SPIN VIEW  (dark, full screen)
+    ══════════════════════════════════════════════ */
+    #spinView {
+      background: radial-gradient(ellipse at 50% 0%, #1a1f6e 0%, #050818 70%);
+      color: #fff; min-height: 100vh; position: relative; overflow: hidden;
+    }
+
+    /* Decorative stars */
+    #spinView::before {
+      content: '';
+      position: absolute; inset: 0; pointer-events: none;
+      background-image:
+        radial-gradient(circle, rgba(255,255,255,0.55) 1px, transparent 1px),
+        radial-gradient(circle, rgba(255,255,255,0.3) 1px, transparent 1px);
+      background-size: 120px 120px, 80px 80px;
+      background-position: 0 0, 40px 40px;
+      opacity: 0.18;
+    }
+
+    .spin-topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 24px; flex-shrink: 0; position: relative; z-index: 2;
+    }
+    .spin-back {
+      background: rgba(255,255,255,0.1); border: none; color: #fff;
+      font-family: var(--font); font-size: 0.85rem; font-weight: 700;
+      border-radius: 50px; padding: 8px 18px; cursor: pointer;
+      transition: background 0.15s;
+    }
+    .spin-back:hover { background: rgba(255,255,255,0.18); }
+    .spin-back:disabled { opacity: 0.3; pointer-events: none; }
+    .spin-brand { font-size: 1rem; font-weight: 900; opacity: 0.75; letter-spacing: 0.04em; text-transform: uppercase; }
+
+    .spin-body {
+      flex: 1; display: flex; flex-direction: column; align-items: center;
+      justify-content: center; padding: 12px 16px 28px; gap: 20px; position: relative; z-index: 2;
+    }
+
+    .spin-eyebrow {
+      font-size: 0.72rem; font-weight: 900; letter-spacing: 0.18em;
+      text-transform: uppercase; opacity: 0.45;
+    }
+
+    /* Slot machine */
+    .slot-machine {
+      display: flex; gap: 12px; justify-content: center; width: 100%; max-width: 760px;
+    }
+    .slot-col-wrap { display: flex; flex-direction: column; align-items: center; gap: 8px; flex: 1; min-width: 0; }
+    .slot-col-label {
+      font-size: 0.65rem; font-weight: 900; letter-spacing: 0.12em;
+      text-transform: uppercase; opacity: 0.4;
+    }
+    .slot-col {
+      width: 100%;
+      height: calc(var(--card-h) * var(--col-vis));
+      overflow: hidden; border-radius: 18px; position: relative;
+      border: 2px solid rgba(255,255,255,0.12);
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.04), inset 0 0 30px rgba(0,0,0,0.4);
+    }
+    /* Fade top & bottom edges for reel effect */
+    .slot-col::before,
+    .slot-col::after {
+      content: ''; position: absolute; left: 0; right: 0; z-index: 3; pointer-events: none;
+      height: 36%;
+    }
+    .slot-col::before { top: 0;    background: linear-gradient(to bottom, rgba(5,8,24,0.85), transparent); }
+    .slot-col::after  { bottom: 0; background: linear-gradient(to top,   rgba(5,8,24,0.85), transparent); }
+
+    /* Center indicator line */
+    .slot-col-inner {
+      display: flex; flex-direction: column; will-change: transform;
+    }
+    .slot-card {
+      height: var(--card-h); flex-shrink: 0;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 4px; padding: 8px 10px; text-align: center;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+    .slot-card .sc-persona {
+      font-size: 0.6rem; font-weight: 900; letter-spacing: 0.08em;
+      border-radius: 5px; padding: 2px 8px; color: #fff; opacity: 0.9;
+    }
+    .slot-card .sc-name   { font-size: 0.82rem; font-weight: 900; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
+    .slot-card .sc-school { font-size: 0.62rem; color: rgba(255,255,255,0.55); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
+    .slot-card.persona-TBS  { background: linear-gradient(160deg, #c0001f 0%, #7a0015 100%); }
+    .slot-card.persona-SCD  { background: linear-gradient(160deg, #1b35d4 0%, #0a1060 100%); }
+    .slot-card.persona-SSET { background: linear-gradient(160deg, #1a5292 0%, #0d2e52 100%); }
+
+    @keyframes col-shake {
+      0%,100% { transform: translateX(0); }
+      25%      { transform: translateX(-4px); }
+      75%      { transform: translateX(4px); }
+    }
+    .slot-col.pre-spin { animation: col-shake 0.22s ease infinite; }
+
+    @keyframes winner-pulse {
+      0%,100% { box-shadow: 0 0 0 3px #ffcc00, 0 0 28px rgba(255,204,0,0.4); }
+      50%      { box-shadow: 0 0 0 4px #ffdd44, 0 0 48px rgba(255,220,0,0.65); }
+    }
+    .slot-col.winner-revealed {
+      border-color: #ffcc00;
+      animation: winner-pulse 1.4s ease-in-out infinite;
+    }
+
+    /* Status text */
+    .spin-status {
+      font-size: 1rem; font-weight: 800; opacity: 0.7; text-align: center;
+      letter-spacing: 0.02em; min-height: 1.4em;
+    }
+    .spin-status.countdown { font-size: 1.5rem; font-weight: 900; opacity: 1; color: #ffcc00; }
+
+    /* Spin button */
+    @keyframes spin-btn-glow {
+      0%,100% { box-shadow: 0 6px 28px rgba(230,30,42,0.5); }
+      50%      { box-shadow: 0 8px 44px rgba(230,30,42,0.8); }
+    }
+    .btn-spin {
+      background: linear-gradient(135deg, #e61e2a 0%, #a30015 100%);
+      color: #fff; font-family: var(--font); font-size: 1.25rem; font-weight: 900;
+      letter-spacing: 0.05em; border: none; border-radius: 50px;
+      padding: 18px 52px; cursor: pointer;
+      animation: spin-btn-glow 2s ease-in-out infinite;
+      transition: transform 0.12s; text-transform: uppercase;
+    }
+    .btn-spin:hover  { transform: scale(1.04); }
+    .btn-spin:active { transform: scale(0.97); }
+    .btn-spin:disabled { opacity: 0.3; pointer-events: none; animation: none; box-shadow: none; }
+    .btn-spin-row { display: flex; gap: 12px; align-items: center; justify-content: center; }
+    .btn-spin-reset {
+      background: rgba(255,255,255,0.1); color: #fff;
+      font-family: var(--font); font-size: 0.85rem; font-weight: 800;
+      border: none; border-radius: 50px; padding: 12px 24px; cursor: pointer;
+    }
+
+    /* ── Winners Overlay ── */
+    .winners-overlay {
+      position: fixed; inset: 0; z-index: 100;
+      background: rgba(0,0,0,0.78); backdrop-filter: blur(10px);
+      display: flex; align-items: center; justify-content: center; padding: 28px;
+    }
+    @keyframes card-pop { from { opacity:0; transform: scale(0.85) translateY(20px); } to { opacity:1; transform: none; } }
+    .winners-card {
+      background: #fff; border-radius: 28px; padding: 36px 28px 28px;
+      max-width: 460px; width: 100%; text-align: center;
+      box-shadow: 0 28px 80px rgba(0,0,0,0.5);
+      animation: card-pop 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
+    }
+    .winners-emoji  { font-size: 3.2rem; line-height: 1; margin-bottom: 8px; }
+    .winners-title  { font-size: 1.55rem; font-weight: 900; color: var(--navy); margin-bottom: 4px; }
+    .winners-sub    { font-size: 0.85rem; opacity: 0.55; margin-bottom: 22px; }
+    .winners-list   { display: flex; flex-direction: column; gap: 10px; margin-bottom: 26px; }
+    .winner-item {
+      display: flex; align-items: center; gap: 12px;
+      background: rgba(13,25,133,0.05); border-radius: 14px; padding: 12px 15px; text-align: left;
+    }
+    .winner-rank  { font-size: 1.4rem; flex-shrink: 0; }
+    .winner-info  { flex: 1; min-width: 0; }
+    .winner-name  { font-size: 0.92rem; font-weight: 900; color: var(--navy); }
+    .winner-school { font-size: 0.75rem; opacity: 0.5; }
+    .winner-badge { font-size: 0.66rem; font-weight: 900; border-radius: 8px; padding: 4px 9px; color: #fff; flex-shrink: 0; }
+    .winner-badge.TBS  { background: var(--tbs); }
+    .winner-badge.SCD  { background: var(--scd); }
+    .winner-badge.SSET { background: var(--sset); }
+
+    /* ── Entry modal (add/edit) ── */
+    .entry-modal-overlay {
+      position: fixed; inset: 0; z-index: 50;
+      background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);
+      display: flex; align-items: center; justify-content: center; padding: 24px;
+    }
+    .entry-modal-card {
+      background: #fff; border-radius: 22px; padding: 28px 24px;
+      max-width: 360px; width: 100%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+    }
+    .entry-modal-card h3 { font-size: 1.05rem; font-weight: 900; margin-bottom: 18px; color: var(--navy); }
+    .form-field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
+    .form-field label { font-size: 0.78rem; font-weight: 800; opacity: 0.65; }
+    .form-field input,
+    .form-field select {
+      border: 2px solid rgba(13,25,133,0.15); border-radius: 10px;
+      padding: 9px 13px; font-family: var(--font); font-size: 0.9rem; color: var(--navy);
+      background: #fff; outline: none;
+    }
+    .form-field input:focus,
+    .form-field select:focus { border-color: var(--navy); }
+    .modal-actions { display: flex; gap: 8px; margin-top: 18px; }
+    .modal-actions .btn { flex: 1; padding: 11px 0; font-size: 0.9rem; border-radius: 12px; }
+
+    .error-banner { font-size: 0.82rem; color: var(--red); font-weight: 700; text-align: center; }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════
+     VIEW 1: POOL SETUP
+════════════════════════════════════════════════════════ -->
+<div class="view active" id="poolView">
+  <header class="topbar">
+    <div>
+      <div class="topbar-brand">RMIT SAT — Prize Spin 🎰</div>
+      <div class="topbar-sub">Step 1 of 2 · Set up your student pool</div>
+    </div>
+  </header>
+
+  <div class="pool-page">
+    <h1>Student Pool Setup</h1>
+    <p class="sub">Choose a date, review the student list, add or remove entries, then confirm to launch the spin.</p>
+
+    <div class="date-bar">
+      <label for="datePicker">Date</label>
+      <input type="date" id="datePicker" />
+      <span class="pool-badge" id="activeBadge">0 active</span>
+    </div>
+
+    <div class="pool-card">
+      <div class="pool-card-header">
+        <span class="pool-card-title">Students in pool</span>
+        <button class="btn btn-add" id="addEntryBtn" type="button">+ Add student</button>
+      </div>
+      <div class="pool-list" id="poolList">
+        <div class="pool-empty" id="poolEmpty">No students found for this date</div>
+      </div>
+    </div>
+
+    <div class="confirm-bar">
+      <p class="confirm-hint" id="confirmHint">Need at least <strong>3 active students</strong> to spin</p>
+      <button class="btn-confirm" id="confirmBtn" disabled type="button">Start Prize Spin →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     VIEW 2: SLOT MACHINE
+════════════════════════════════════════════════════════ -->
+<div class="view" id="spinView">
+  <div class="spin-topbar">
+    <button class="spin-back" id="backToPoolBtn" type="button">← Back to Pool</button>
+    <span class="spin-brand">RMIT SAT · Prize Spin</span>
+    <span style="width:110px"></span>
+  </div>
+
+  <div class="spin-body">
+    <span class="spin-eyebrow">🎰 Today's lucky winners</span>
+
+    <div class="slot-machine">
+      <div class="slot-col-wrap">
+        <div class="slot-col-label">Winner 1</div>
+        <div class="slot-col" id="col0"><div class="slot-col-inner" id="inner0"></div></div>
+      </div>
+      <div class="slot-col-wrap">
+        <div class="slot-col-label">Winner 2</div>
+        <div class="slot-col" id="col1"><div class="slot-col-inner" id="inner1"></div></div>
+      </div>
+      <div class="slot-col-wrap">
+        <div class="slot-col-label">Winner 3</div>
+        <div class="slot-col" id="col2"><div class="slot-col-inner" id="inner2"></div></div>
+      </div>
+    </div>
+
+    <div class="spin-status" id="spinStatus">Press SPIN to begin</div>
+
+    <div class="btn-spin-row">
+      <button class="btn-spin" id="spinBtn" type="button">🎰 SPIN</button>
+      <button class="btn-spin-reset" id="resetBtn" style="display:none" type="button">↺ Reset</button>
+    </div>
+  </div>
+</div>
+
+<!-- Winners overlay -->
+<div class="winners-overlay" id="winnersOverlay" style="display:none">
+  <div class="winners-card">
+    <div class="winners-emoji">🎉</div>
+    <h2 class="winners-title">Congratulations!</h2>
+    <p class="winners-sub" id="winnersSub"></p>
+    <div class="winners-list" id="winnersList"></div>
+    <button class="btn btn-primary" style="width:100%;padding:13px 0;font-size:1rem" id="closeWinnersBtn" type="button">Close</button>
+  </div>
+</div>
+
+<!-- Add / Edit modal -->
+<div class="entry-modal-overlay" id="entryModal" style="display:none">
+  <div class="entry-modal-card">
+    <h3 id="modalTitle">Add Student</h3>
+    <div class="form-field">
+      <label>Name</label>
+      <input type="text" id="entryName" placeholder="Nguyen Van A" maxlength="50" />
+    </div>
+    <div class="form-field">
+      <label>High School</label>
+      <input type="text" id="entrySchool" placeholder="THPT Chu Van An" maxlength="60" />
+    </div>
+    <div class="form-field">
+      <label>Persona</label>
+      <select id="entryPersona">
+        <option value="TBS">TBS — The Business School</option>
+        <option value="SCD">SCD — Communication &amp; Design</option>
+        <option value="SSET">SSET — Science, Engineering &amp; Tech</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" id="saveEntryBtn" type="button">Save</button>
+      <button class="btn btn-ghost" id="cancelEntryBtn" type="button">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<audio id="slotAudio"     src="slot.mp3"     preload="auto"></audio>
+<audio id="clappingAudio" src="clapping.mp3" preload="none"></audio>
+
+<script src="firebase-config.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script>
+  // ── Firebase ───────────────────────────────────────────────────────────
+  let db;
+  try {
+    if (typeof FIREBASE_CONFIG !== "undefined" && FIREBASE_CONFIG.apiKey) {
+      if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+      db = firebase.database();
+    }
+  } catch (e) { console.warn("Firebase unavailable:", e.message); }
+
+  // ── Audio ──────────────────────────────────────────────────────────────
+  function playSlotSound() {
+    try { const a = document.getElementById("slotAudio"); a.currentTime = 0; a.volume = 0.7; a.playbackRate = 2; a.loop = true; a.play().catch(() => {}); } catch (_) {}
+  }
+  function stopSlotSound() {
+    try { const a = document.getElementById("slotAudio"); a.loop = false; a.pause(); a.currentTime = 0; } catch (_) {}
+  }
+  function playClapping() {
+    try { const a = document.getElementById("clappingAudio"); a.currentTime = 0; a.volume = 0.75; a.playbackRate = 1.5; a.play().catch(() => {}); } catch (_) {}
+  }
+  function playDing() {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = ctx.createOscillator(), gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.frequency.setValueAtTime(1047, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(523, ctx.currentTime + 0.35);
+      gain.gain.setValueAtTime(0.6, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
+      osc.start(); osc.stop(ctx.currentTime + 0.6);
+    } catch (_) {}
+  }
+
+  // ── State ──────────────────────────────────────────────────────────────
+  let allEntries  = [];
+  let activePool  = [];
+  let unsubFn     = null;
+  let editingId   = null; // null = new entry, string = editing existing
+  let spinActive  = false;
+  let cancelFns   = [];
+
+  const CARD_H = 110;
+
+  // ── View switching ─────────────────────────────────────────────────────
+  function showView(id) {
+    document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+    document.getElementById(id).classList.add("active");
+  }
+
+  // ── Helpers ────────────────────────────────────────────────────────────
+  function escHtml(s) {
+    return String(s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+  }
+  function todayStr() { return new Date().toLocaleDateString("en-CA"); }
+  function dateToMs(dateStr) { return new Date(dateStr + "T12:00:00").getTime(); }
+
+  // ── Pool listener ──────────────────────────────────────────────────────
+  const datePicker = document.getElementById("datePicker");
+  datePicker.value = todayStr();
+
+  datePicker.addEventListener("change", loadPool);
+
+  function loadPool() {
+    if (!db) { renderPoolList([]); return; }
+    if (unsubFn) { unsubFn(); unsubFn = null; }
+    const ref = db.ref("studentResults");
+    const listener = ref.on("value", snapshot => {
+      allEntries = [];
+      snapshot.forEach(child => { const v = child.val(); if (v) allEntries.push({ id: child.key, ...v }); });
+      rebuildPool();
+    });
+    unsubFn = () => ref.off("value", listener);
+  }
+
+  function rebuildPool() {
+    const dateStr = datePicker.value;
+    activePool = allEntries.filter(e => !e.excluded && new Date(e.t).toLocaleDateString("en-CA") === dateStr);
+    const dayAll = allEntries.filter(e => new Date(e.t).toLocaleDateString("en-CA") === dateStr);
+    renderPoolList(dayAll);
+    updateConfirmBar();
+  }
+
+  function renderPoolList(dayEntries) {
+    const list  = document.getElementById("poolList");
+    const empty = document.getElementById("poolEmpty");
+    const badge = document.getElementById("activeBadge");
+    badge.textContent = `${activePool.length} active`;
+
+    if (dayEntries.length === 0) {
+      list.innerHTML = "";
+      empty.style.display = "";
+      return;
+    }
+    empty.style.display = "none";
+    list.innerHTML = "";
+
+    dayEntries.forEach(entry => {
+      const div = document.createElement("div");
+      div.className = "entry-row" + (entry.excluded ? " is-excluded" : "");
+      div.innerHTML = `
+        <span class="persona-chip ${escHtml(entry.persona)}">${escHtml(entry.persona)}</span>
+        <span class="entry-name">${escHtml(entry.name || "Guest")}</span>
+        <span class="entry-school">${escHtml(entry.school || "")}</span>
+        <div class="entry-actions">
+          <button class="btn btn-sm btn-edit"    data-id="${entry.id}" type="button">Edit</button>
+          ${entry.excluded
+            ? `<button class="btn btn-sm btn-restore" data-id="${entry.id}" type="button">Restore</button>`
+            : `<button class="btn btn-sm btn-remove"  data-id="${entry.id}" type="button">Remove</button>`}
+        </div>`;
+      list.appendChild(div);
+    });
+
+    list.querySelectorAll(".btn-edit").forEach(btn => btn.addEventListener("click", () => openEditModal(btn.dataset.id)));
+    list.querySelectorAll(".btn-remove").forEach(btn => btn.addEventListener("click", () => {
+      if (db) db.ref(`studentResults/${btn.dataset.id}`).update({ excluded: true });
+    }));
+    list.querySelectorAll(".btn-restore").forEach(btn => btn.addEventListener("click", () => {
+      if (db) db.ref(`studentResults/${btn.dataset.id}`).update({ excluded: false });
+    }));
+  }
+
+  function updateConfirmBar() {
+    const btn  = document.getElementById("confirmBtn");
+    const hint = document.getElementById("confirmHint");
+    btn.disabled = activePool.length < 3;
+    if (activePool.length < 3) {
+      hint.innerHTML = `Need at least <strong>${Math.max(0, 3 - activePool.length)} more active student${3 - activePool.length !== 1 ? "s" : ""}</strong> to spin`;
+    } else {
+      hint.innerHTML = `<strong>${activePool.length} students</strong> ready — confirm to launch the spin!`;
+    }
+  }
+
+  // ── Confirm → go to spin view ──────────────────────────────────────────
+  document.getElementById("confirmBtn").addEventListener("click", () => {
+    if (activePool.length < 3) return;
+    resetSpin();
+    showView("spinView");
+  });
+  document.getElementById("backToPoolBtn").addEventListener("click", () => {
+    if (spinActive) return;
+    stopSlotSound();
+    cancelFns.forEach(fn => fn()); cancelFns = [];
+    showView("poolView");
+  });
+
+  // ── Add/Edit modal ─────────────────────────────────────────────────────
+  document.getElementById("addEntryBtn").addEventListener("click", () => openAddModal());
+  document.getElementById("cancelEntryBtn").addEventListener("click", closeModal);
+  document.getElementById("entryModal").addEventListener("click", e => {
+    if (e.target === document.getElementById("entryModal")) closeModal();
+  });
+
+  function openAddModal() {
+    editingId = null;
+    document.getElementById("modalTitle").textContent  = "Add Student";
+    document.getElementById("entryName").value         = "";
+    document.getElementById("entrySchool").value       = "";
+    document.getElementById("entryPersona").value      = "TBS";
+    document.getElementById("entryModal").style.display = "flex";
+    document.getElementById("entryName").focus();
+  }
+
+  function openEditModal(id) {
+    const entry = allEntries.find(e => e.id === id);
+    if (!entry) return;
+    editingId = id;
+    document.getElementById("modalTitle").textContent  = "Edit Student";
+    document.getElementById("entryName").value         = entry.name   || "";
+    document.getElementById("entrySchool").value       = entry.school || "";
+    document.getElementById("entryPersona").value      = entry.persona || "TBS";
+    document.getElementById("entryModal").style.display = "flex";
+    document.getElementById("entryName").focus();
+  }
+
+  function closeModal() {
+    document.getElementById("entryModal").style.display = "none";
+    editingId = null;
+  }
+
+  document.getElementById("saveEntryBtn").addEventListener("click", async () => {
+    const name    = document.getElementById("entryName").value.trim();
+    const school  = document.getElementById("entrySchool").value.trim();
+    const persona = document.getElementById("entryPersona").value;
+    if (!name) { document.getElementById("entryName").focus(); return; }
+    if (!db) { closeModal(); return; }
+
+    if (editingId) {
+      await db.ref(`studentResults/${editingId}`).update({ name, school, persona });
+    } else {
+      await db.ref("studentResults").push({
+        name, school, persona,
+        t: dateToMs(datePicker.value),
+        excluded: false
+      });
+    }
+    closeModal();
+  });
+
+  // ── Slot machine ───────────────────────────────────────────────────────
+  function buildCard(entry) {
+    const div = document.createElement("div");
+    div.className = `slot-card persona-${entry.persona || "TBS"}`;
+    div.innerHTML = `
+      <span class="sc-persona">${escHtml(entry.persona || "?")}</span>
+      <span class="sc-name">${escHtml(entry.name || "Guest")}</span>
+      <span class="sc-school">${escHtml(entry.school || "")}</span>`;
+    return div;
+  }
+
+  function easeOutQuint(t) { return 1 - Math.pow(1 - t, 5); }
+
+  function spinColumn(innerEl, colEl, winners, colIndex, onDone) {
+    const pool = activePool;
+    innerEl.innerHTML = "";
+    innerEl.style.transform = "translateY(0)";
+
+    // Fill with shuffled pool repeated many times, then winner at end
+    const reps = Math.max(10, Math.ceil(50 / pool.length));
+    const shuffled = [...pool].sort(() => Math.random() - 0.5);
+    for (let r = 0; r < reps; r++) shuffled.forEach(e => innerEl.appendChild(buildCard(e)));
+    innerEl.appendChild(buildCard(winners[colIndex]));
+
+    const totalCards  = innerEl.children.length;
+    const winnerIdx   = totalCards - 1;
+    // Show winner in the middle visible row (row index 2 of 5)
+    const midSlot     = Math.floor(5 / 2); // = 2
+    const finalY      = -((winnerIdx - midSlot) * CARD_H);
+
+    const duration = 2200; // ms to decelerate into place
+    const startTime = performance.now();
+    let rafId;
+
+    function step(now) {
+      const elapsed = Math.min(now - startTime, duration);
+      const t = elapsed / duration;
+      const eased = easeOutQuint(t);
+      innerEl.style.transform = `translateY(${finalY * eased}px)`;
+      if (t < 1) {
+        rafId = requestAnimationFrame(step);
+      } else {
+        innerEl.style.transform = `translateY(${finalY}px)`;
+        colEl.classList.remove("pre-spin");
+        colEl.classList.add("winner-revealed");
+        if (onDone) onDone();
+      }
+    }
+    rafId = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(rafId);
+  }
+
+  function startSpin() {
+    if (spinActive || activePool.length < 3) return;
+    spinActive = true;
+    document.getElementById("spinBtn").disabled = true;
+    document.getElementById("resetBtn").style.display = "none";
+
+    // Pick 3 random winners
+    const shuffled = [...activePool].sort(() => Math.random() - 0.5);
+    const winners  = shuffled.slice(0, 3);
+
+    const status = document.getElementById("spinStatus");
+
+    // Reset columns visually
+    [0,1,2].forEach(i => {
+      document.getElementById(`col${i}`).classList.remove("winner-revealed","pre-spin");
+      document.getElementById(`inner${i}`).style.transform = "translateY(0)";
+      document.getElementById(`inner${i}`).innerHTML = "";
+    });
+
+    // Play slot sound
+    playSlotSound();
+
+    // Pre-spin: shake + countdown
+    [0,1,2].forEach(i => document.getElementById(`col${i}`).classList.add("pre-spin"));
+
+    let countdown = 3;
+    status.className = "spin-status countdown";
+    status.textContent = `Get ready… ${countdown}`;
+    const countdownInterval = setInterval(() => {
+      countdown--;
+      if (countdown > 0) {
+        status.textContent = `Get ready… ${countdown}`;
+      } else {
+        clearInterval(countdownInterval);
+      }
+    }, 2000);
+
+    cancelFns.push(() => clearInterval(countdownInterval));
+
+    // t = 6s: start spinning all 3 columns
+    const t1 = setTimeout(() => {
+      status.className = "spin-status";
+      status.textContent = "Spinning…";
+      [0,1,2].forEach(i => document.getElementById(`col${i}`).classList.remove("pre-spin"));
+
+      const revealedWinners = [];
+      const stopDelays = [3500, 3500, 3500]; // 3.5s between each stop
+
+      let accumulated = 0;
+      cancelFns.push(...stopDelays.map((delay, i) => {
+        accumulated += delay;
+        const t = setTimeout(() => {
+          const col   = document.getElementById(`col${i}`);
+          const inner = document.getElementById(`inner${i}`);
+          const cancelAnim = spinColumn(inner, col, winners, i, () => {
+            playDing();
+            revealedWinners.push(winners[i]);
+
+            if (i < 2) {
+              status.textContent = `Winner ${i + 1} revealed! Next…`;
+            } else {
+              // All 3 done
+              stopSlotSound();
+              setTimeout(playClapping, 200);
+              status.textContent = "🎉 We have our winners!";
+              document.getElementById("resetBtn").style.display = "";
+              spinActive = false;
+              setTimeout(() => showWinners(winners), 900);
+            }
+          });
+          cancelFns.push(cancelAnim);
+        }, accumulated);
+        return () => clearTimeout(t);
+      }));
+    }, 6000);
+    cancelFns.push(() => clearTimeout(t1));
+  }
+
+  function showWinners(winners) {
+    const ranks = ["🥇","🥈","🥉"];
+    const list  = document.getElementById("winnersList");
+    list.innerHTML = "";
+    winners.forEach((w, i) => {
+      const div = document.createElement("div");
+      div.className = "winner-item";
+      div.innerHTML = `
+        <span class="winner-rank">${ranks[i]}</span>
+        <div class="winner-info">
+          <div class="winner-name">${escHtml(w.name || "Guest")}</div>
+          <div class="winner-school">${escHtml(w.school || "")}</div>
+        </div>
+        <span class="winner-badge ${escHtml(w.persona)}">${escHtml(w.persona || "?")}</span>`;
+      list.appendChild(div);
+    });
+    document.getElementById("winnersSub").textContent = `Date: ${datePicker.value}`;
+    document.getElementById("winnersOverlay").style.display = "flex";
+  }
+
+  function resetSpin() {
+    cancelFns.forEach(fn => { try { fn(); } catch(_){} }); cancelFns = [];
+    spinActive = false;
+    stopSlotSound();
+    [0,1,2].forEach(i => {
+      const col = document.getElementById(`col${i}`);
+      col.classList.remove("winner-revealed","pre-spin");
+      const inner = document.getElementById(`inner${i}`);
+      inner.innerHTML = "";
+      inner.style.transform = "translateY(0)";
+    });
+    document.getElementById("spinStatus").className = "spin-status";
+    document.getElementById("spinStatus").textContent = "Press SPIN to begin";
+    document.getElementById("spinBtn").disabled = false;
+    document.getElementById("resetBtn").style.display = "none";
+    document.getElementById("winnersOverlay").style.display = "none";
+  }
+
+  document.getElementById("spinBtn").addEventListener("click", startSpin);
+  document.getElementById("resetBtn").addEventListener("click", resetSpin);
+  document.getElementById("closeWinnersBtn").addEventListener("click", () => {
+    document.getElementById("winnersOverlay").style.display = "none";
+    resetSpin();
+  });
+
+  // ── Init ───────────────────────────────────────────────────────────────
+  loadPool();
+</script>
+</body>
+</html>
