@@ -1432,7 +1432,7 @@
   <div class="story-challenge-modal-overlay" id="storyChallengeModal" role="dialog" aria-modal="true">
     <div class="story-challenge-modal-card">
       <h3 class="story-challenge-modal-title" id="storyChallengeModalTitle">Share your Story challenge now</h3>
-      <p class="story-challenge-modal-sub" id="storyChallengeModalSub">Copy tags, share to Instagram or Facebook Story, then upload one screenshot as proof.</p>
+      <p class="story-challenge-modal-sub" id="storyChallengeModalSub">Copy tags, share to Instagram or Facebook Story, then return to continue.</p>
       <div class="story-challenge-tags-preview" id="storyChallengeTagsPreview">#RMITVietnam</div>
       <div class="story-challenge-modal-grid">
         <button class="btn btn-primary" id="modalCopyTagsBtn" type="button">Copy Tags</button>
@@ -1440,13 +1440,9 @@
         <button class="btn btn-share-fb" id="modalShareFbBtn" type="button">FB Story</button>
         <button class="btn btn-ghost" id="modalCloseStoryChallengeBtn" type="button">Close</button>
       </div>
-      <div class="story-challenge-proof-row">
-        <button class="btn btn-secondary btn-full" id="modalProofUploadBtn" type="button">I Uploaded Story - Submit Proof</button>
-      </div>
       <p class="story-challenge-modal-footnote" id="storyChallengeModalFootnote">Direct Story upload confirmation is not exposed by Instagram or Facebook to websites. Screenshot proof is used for challenge completion.</p>
     </div>
   </div>
-  <input id="storyProofInput" type="file" accept="image/*" style="position:absolute;opacity:0;pointer-events:none;width:0;height:0;" />
 
   <script>
     const content = {
@@ -1473,13 +1469,12 @@
         campaignTagsLabel: "Story caption",
         campaignTagsHint: "👆 Click tag/hashtag to copy",
         challengeModalTitle: "Story challenge: share now",
-        challengeModalSub: "Copy these tags, share to Instagram/Facebook Story, then submit one screenshot as proof.",
+        challengeModalSub: "Copy these tags, share to Instagram/Facebook Story, then return to continue.",
         challengeCopyTagsBtn: "Copy Tags",
         challengeCloseBtn: "Close",
-        challengeProofBtn: "I Uploaded Story - Submit Proof",
         challengeFootnote: "",
-        challengeNotePending: "Story challenge in progress. Share your Story, then upload proof to complete.",
-        challengeNoteCompleted: "Challenge completed. Story proof submitted.",
+        challengeNotePending: "Story challenge in progress. Share your Story to complete.",
+        challengeNoteCompleted: "Challenge completed.",
         courseCardsEyebrow: "Courses recommended for you",
         slotSpinnerLabel: "Revealing your persona…",
         squadBannerCountSuffix: "students discovered {school} with you!",
@@ -1565,12 +1560,11 @@
         campaignTagsLabel: "Caption cho Story",
         campaignTagsHint: "👆 Nhấn tag/hashtag để sao chép",
         challengeModalTitle: "Thử thách Story: chia sẻ ngay",
-        challengeModalSub: "Sao chép các tag, chia sẻ lên Instagram/Facebook Story rồi gửi 1 ảnh chụp màn hình để xác nhận.",
+        challengeModalSub: "Sao chép các tag và chia sẻ lên Instagram/Facebook Story, rồi quay lại để tiếp tục.",
         challengeCopyTagsBtn: "Sao chép tag",
         challengeCloseBtn: "Đóng",
-        challengeProofBtn: "Tôi đã đăng Story - Gửi minh chứng",
         challengeFootnote: "",
-        challengeNotePending: "Bạn đang trong thử thách Story. Hãy chia sẻ Story rồi tải minh chứng để hoàn tất.",
+        challengeNotePending: "Bạn đang trong thử thách Story. Hãy chia sẻ Story để hoàn tất.",
         challengeNoteCompleted: "Bạn đã hoàn thành thử thách",
         courseCardsEyebrow: "Môn học dành cho bạn",
         slotSpinnerLabel: "Đang khám phá persona của bạn…",
@@ -1686,6 +1680,7 @@
     let answers = [];
     let uploadedImageData = "";
     let _storyChallengeModalTimer = null;
+    let _shareExitArmedUntil = 0;
 
     function getParticipantToken() {
       const existing = localStorage.getItem("rmitParticipantToken");
@@ -1813,7 +1808,6 @@
       setText("storyChallengeModalSub", t().challengeModalSub);
       setText("modalCopyTagsBtn", t().challengeCopyTagsBtn);
       setText("modalCloseStoryChallengeBtn", t().challengeCloseBtn);
-      setText("modalProofUploadBtn", t().challengeProofBtn);
       setText("storyChallengeModalFootnote", t().challengeFootnote);
       const storyChallengeFootnote = document.getElementById("storyChallengeModalFootnote");
       if (storyChallengeFootnote) {
@@ -2407,67 +2401,21 @@
         lastSharedAt: Date.now(),
         participantToken: getParticipantToken()
       });
+      _shareExitArmedUntil = Date.now() + 120000;
     }
 
-    async function submitStoryProof(file) {
-      if (!file) return;
-      try {
-        const objectUrl = URL.createObjectURL(file);
-        const img = new Image();
-        const compressed = await new Promise((resolve, reject) => {
-          img.onload = () => {
-            const maxW = 720;
-            const scale = Math.min(maxW / img.width, 1);
-            const canvas = document.createElement("canvas");
-            canvas.width = Math.round(img.width * scale);
-            canvas.height = Math.round(img.height * scale);
-            const ctx = canvas.getContext("2d");
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-            canvas.toBlob(blob => {
-              if (!blob) { reject(new Error("Proof image conversion failed")); return; }
-              const reader = new FileReader();
-              reader.onload = () => resolve(reader.result);
-              reader.onerror = reject;
-              reader.readAsDataURL(blob);
-            }, "image/jpeg", 0.74);
-          };
-          img.onerror = reject;
-          img.src = objectUrl;
-        });
-        URL.revokeObjectURL(objectUrl);
+    function completeChallengeIfLeftScreen() {
+      const state = readStoryChallengeState();
+      if (state.status !== "pending") return;
+      if (Date.now() > _shareExitArmedUntil) return;
 
-        const payload = {
-          t: Date.now(),
-          participantToken: getParticipantToken(),
-          studentName: getStudentName() || "Guest",
-          highSchool: getSchoolName(),
-          persona: { A: "TBS", B: "SCD", C: "SSET" }[getResultLetter()] || "TBS",
-          proofImg: compressed
-        };
-
-        let proofSavedToFirebase = false;
-        if (typeof firebase !== "undefined" && firebase.apps && firebase.apps.length) {
-          try {
-            await firebase.database().ref("storyChallengeProofs").push(payload);
-            proofSavedToFirebase = true;
-          } catch (firebaseError) {
-            console.warn("Story proof write blocked in Firebase:", firebaseError);
-          }
-        }
-
-        writeStoryChallengeState({
-          status: "completed",
-          completedAt: Date.now(),
-          proofSubmittedAt: Date.now()
-        });
-        showShareToast(proofSavedToFirebase
-          ? "Proof submitted. Challenge marked as completed."
-          : "Proof recorded on this device. Challenge marked as completed.");
-        closeStoryChallengeModal();
-      } catch (error) {
-        console.warn("Story proof upload failed:", error);
-        showShareToast("Could not submit proof. Please try again.");
-      }
+      writeStoryChallengeState({
+        status: "completed",
+        completedAt: Date.now(),
+        completionMethod: "share-exit"
+      });
+      _shareExitArmedUntil = 0;
+      closeStoryChallengeModal();
     }
 
     // platform: "ig" | "fb"
@@ -2947,16 +2895,14 @@
     document.getElementById("modalShareIgBtn").addEventListener("click", () => shareToStory("ig"));
     document.getElementById("modalShareFbBtn").addEventListener("click", () => shareToStory("fb"));
     document.getElementById("modalCloseStoryChallengeBtn").addEventListener("click", closeStoryChallengeModal);
-    document.getElementById("modalProofUploadBtn").addEventListener("click", () => {
-      document.getElementById("storyProofInput").click();
-    });
-    document.getElementById("storyProofInput").addEventListener("change", (e) => {
-      submitStoryProof(e.target.files && e.target.files[0]);
-      e.target.value = "";
-    });
     document.getElementById("storyChallengeModal").addEventListener("click", (e) => {
       if (e.target === document.getElementById("storyChallengeModal")) closeStoryChallengeModal();
     });
+
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "hidden") completeChallengeIfLeftScreen();
+    });
+    window.addEventListener("pagehide", completeChallengeIfLeftScreen);
 
     // Friend QR share — build card canvas, store in Firebase, QR links to friend.html?k=<key>
     document.getElementById("friendShareBtn").addEventListener("click", async () => {
