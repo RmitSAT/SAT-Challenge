@@ -1476,7 +1476,7 @@
         challengeCopyTagsBtn: "Copy Tags",
         challengeCloseBtn: "Close",
         challengeProofBtn: "I Uploaded Story - Submit Proof",
-        challengeFootnote: "Instagram/Facebook do not provide direct Story-post confirmation to websites, so screenshot proof is used.",
+        challengeFootnote: "",
         challengeNotePending: "Story challenge in progress. Share your Story, then upload proof to complete.",
         challengeNoteCompleted: "Challenge completed. Story proof submitted.",
         courseCardsEyebrow: "Courses recommended for you",
@@ -1568,7 +1568,7 @@
         challengeCopyTagsBtn: "Sao chép tag",
         challengeCloseBtn: "Đóng",
         challengeProofBtn: "Tôi đã đăng Story - Gửi minh chứng",
-        challengeFootnote: "Instagram/Facebook không cung cấp xác nhận đăng Story trực tiếp cho website, nên dùng ảnh chụp màn hình để xác nhận.",
+        challengeFootnote: "",
         challengeNotePending: "Bạn đang trong thử thách Story. Hãy chia sẻ Story rồi tải minh chứng để hoàn tất.",
         challengeNoteCompleted: "Bạn đã hoàn thành thử thách. Minh chứng Story đã được gửi.",
         courseCardsEyebrow: "Môn học dành cho bạn",
@@ -1645,7 +1645,7 @@
     };
 
     const REVEAL_FLOW = {
-      spinnerMs: 1500,
+      spinnerMs: 3000,
       postRevealModalDelayMs: 3000
     };
 
@@ -1814,6 +1814,10 @@
       setText("modalCloseStoryChallengeBtn", t().challengeCloseBtn);
       setText("modalProofUploadBtn", t().challengeProofBtn);
       setText("storyChallengeModalFootnote", t().challengeFootnote);
+      const storyChallengeFootnote = document.getElementById("storyChallengeModalFootnote");
+      if (storyChallengeFootnote) {
+        storyChallengeFootnote.style.display = t().challengeFootnote ? "" : "none";
+      }
 
       updateWelcomeTitle();
       renderStoryChallengeNote();
@@ -2440,8 +2444,14 @@
           proofImg: compressed
         };
 
+        let proofSavedToFirebase = false;
         if (typeof firebase !== "undefined" && firebase.apps && firebase.apps.length) {
-          await firebase.database().ref("storyChallengeProofs").push(payload);
+          try {
+            await firebase.database().ref("storyChallengeProofs").push(payload);
+            proofSavedToFirebase = true;
+          } catch (firebaseError) {
+            console.warn("Story proof write blocked in Firebase:", firebaseError);
+          }
         }
 
         writeStoryChallengeState({
@@ -2449,7 +2459,9 @@
           completedAt: Date.now(),
           proofSubmittedAt: Date.now()
         });
-        showShareToast("Proof submitted. Challenge marked as completed.");
+        showShareToast(proofSavedToFirebase
+          ? "Proof submitted. Challenge marked as completed."
+          : "Proof recorded on this device. Challenge marked as completed.");
         closeStoryChallengeModal();
       } catch (error) {
         console.warn("Story proof upload failed:", error);
@@ -2603,7 +2615,7 @@
     function playSlotSound() {
       try {
         const audio = document.getElementById("slotAudio");
-        if (audio) { audio.currentTime = 0; audio.volume = 0.7; audio.playbackRate = 4; audio.loop = true; audio.play().catch(() => {}); }
+        if (audio) { audio.currentTime = 0; audio.volume = 0.7; audio.playbackRate = 2; audio.loop = true; audio.play().catch(() => {}); }
       } catch (_) {}
     }
     function stopSlotSound() {
@@ -2628,11 +2640,11 @@
         for (let k = 0; k < count; k++) { steps.push({ idx: pos % 3, delay }); pos++; }
       }
 
-      // ~2.5 seconds of spinning (half of the previous ~5s)
-      addSteps(50, 15);   // fast
-      addSteps(15, 30);   // medium
-      addSteps(8,  62);   // slow-medium
-      [88, 112, 138, 162, 188].forEach(d => { steps.push({ idx: pos % 3, delay: d }); pos++; });
+      // ~5 seconds of spinning
+      addSteps(50, 30);   // fast
+      addSteps(15, 60);   // medium
+      addSteps(8,  125);  // slow-medium
+      [175, 225, 275, 325, 375].forEach(d => { steps.push({ idx: pos % 3, delay: d }); pos++; });
       // pos = 78; nextIdx = 78 % 3 = 0 (TBS)
 
       // General formula: last extra step must land on targetIndex
@@ -2640,12 +2652,12 @@
       let extraCount = ((targetIndex - nextIdx + 1) % 3 + 3) % 3;
       if (extraCount === 0) extraCount = 3;
       for (let e = 0; e < extraCount; e++) { steps.push({ idx: pos % 3, delay: 325 }); pos++; }
-      // TBS/SCD/SSET landing adds up to two extra 162ms waits based on target
+      // TBS/SCD/SSET landing adds up to two extra 325ms waits based on target
 
       // Total spinning time = sum of every step delay except the last
       const totalSpinMs = steps.slice(0, -1).reduce((s, step) => s + step.delay, 0);
-      // Fire clapping near the end of the shorter spin
-      setTimeout(playClapping, Math.max(0, totalSpinMs - 1000));
+      // Fire clapping 2s before the slot stops
+      setTimeout(playClapping, Math.max(0, totalSpinMs - 2000));
 
       let i = 0;
       function tick() {
@@ -2656,7 +2668,7 @@
         });
         const newBg = document.getElementById(bgIds[idx]);
         newBg.classList.add("active");
-        if (delay >= 50) newBg.classList.add("slot-slide-in");
+        if (delay >= 100) newBg.classList.add("slot-slide-in");
 
         if (i < steps.length - 1) {
           i++;
