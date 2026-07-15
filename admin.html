@@ -334,6 +334,9 @@
       .analytics-filter-group input[type="date"] {
         width: 100%; font-size: 0.82rem; padding: 10px 10px;
       }
+      .analytics-filter-group select {
+        width: 100%; max-width: none; font-size: 0.82rem; padding: 10px 10px;
+      }
       .analytics-filter .btn-inline {
         align-self: end; min-height: 42px;
       }
@@ -466,6 +469,13 @@
     .analytics-filter-group input[type="date"] {
       width: auto; padding: 8px 12px; font-size: 0.85rem; border-radius: 10px;
     }
+    .analytics-filter-group select {
+      width: auto; max-width: 180px; padding: 8px 12px; font-size: 0.85rem; border-radius: 10px;
+      font-family: var(--font); font-weight: 700; color: #1a1a2e;
+      background: #f5f6fa; border: 2px solid rgba(13,25,133,0.1); outline: none;
+      transition: border-color 0.18s;
+    }
+    .analytics-filter-group select:focus { border-color: var(--navy); background: #fff; }
     .analytics-table-wrap {
       overflow-x: auto;
       border-radius: 12px;
@@ -960,6 +970,19 @@
         <div class="analytics-filter-group">
           <label for="subFilterTo">To date</label>
           <input type="date" id="subFilterTo" />
+        </div>
+        <div class="analytics-filter-group">
+          <label for="subFilterSchool">High school</label>
+          <select id="subFilterSchool"><option value="">All schools</option></select>
+        </div>
+        <div class="analytics-filter-group">
+          <label for="subFilterPersona">Persona</label>
+          <select id="subFilterPersona">
+            <option value="">All personas</option>
+            <option value="TBS">TBS</option>
+            <option value="SCD">SCD</option>
+            <option value="SSET">SSET</option>
+          </select>
         </div>
         <button class="btn-inline" id="subApplyFilterBtn" type="button">Filter</button>
         <button class="btn-inline btn-danger" id="subClearFilterBtn" type="button">Clear</button>
@@ -1581,8 +1604,10 @@ by: <strong>${escHtml(data.updatedBy || "—")}</strong>`;
     }
 
     function getFilteredSubmissions() {
-      const fromVal = document.getElementById("subFilterFrom").value;
-      const toVal   = document.getElementById("subFilterTo").value;
+      const fromVal    = document.getElementById("subFilterFrom").value;
+      const toVal      = document.getElementById("subFilterTo").value;
+      const schoolVal  = document.getElementById("subFilterSchool").value;
+      const personaVal = document.getElementById("subFilterPersona").value;
       let rows = _allStudentResults.slice();
       if (fromVal) {
         const fromMs = new Date(fromVal + "T00:00:00").getTime();
@@ -1592,14 +1617,40 @@ by: <strong>${escHtml(data.updatedBy || "—")}</strong>`;
         const toMs = new Date(toVal + "T23:59:59.999").getTime();
         rows = rows.filter(r => typeof r.t === "number" && r.t <= toMs);
       }
+      if (schoolVal)  rows = rows.filter(r => (r.school || "").trim() === schoolVal);
+      if (personaVal) rows = rows.filter(r => r.persona === personaVal);
       rows.sort((a, b) => (b.t || 0) - (a.t || 0));
       return rows;
     }
 
+    // Keeps the "High school" filter dropdown in sync with schools seen across
+    // ALL entries (not just the currently filtered rows), preserving the
+    // admin's current selection if it's still valid.
+    function populateSchoolFilterOptions() {
+      const sel = document.getElementById("subFilterSchool");
+      const current = sel.value;
+      const schools = [...new Set(_allStudentResults.map(r => (r.school || "").trim()).filter(Boolean))]
+        .sort((a, b) => a.localeCompare(b));
+      sel.innerHTML = '<option value="">All schools</option>' +
+        schools.map(s => `<option value="${escHtml(s)}">${escHtml(s)}</option>`).join("");
+      if (schools.includes(current)) sel.value = current;
+    }
+
+    function buildFilterDescription(fromVal, toVal, schoolVal, personaVal) {
+      const parts = [];
+      if (fromVal || toVal) parts.push(`${fromVal || "…"} → ${toVal || "…"}`);
+      if (schoolVal)  parts.push(`school: ${schoolVal}`);
+      if (personaVal) parts.push(`persona: ${personaVal}`);
+      return parts.length ? ` (${parts.join(", ")})` : "";
+    }
+
     function renderSubmissions() {
+      populateSchoolFilterOptions();
       const rows = getFilteredSubmissions();
-      const fromVal = document.getElementById("subFilterFrom").value;
-      const toVal   = document.getElementById("subFilterTo").value;
+      const fromVal    = document.getElementById("subFilterFrom").value;
+      const toVal      = document.getElementById("subFilterTo").value;
+      const schoolVal  = document.getElementById("subFilterSchool").value;
+      const personaVal = document.getElementById("subFilterPersona").value;
 
       const schools = new Set();
       let tbs = 0, scd = 0, sset = 0;
@@ -1645,7 +1696,7 @@ by: <strong>${escHtml(data.updatedBy || "—")}</strong>`;
 
       const hintEl = document.getElementById("subRangeHint");
       const delBtn = document.getElementById("subDeleteAllBtn");
-      const rangeDesc = fromVal || toVal ? ` (${fromVal || "…"} → ${toVal || "…"})` : "";
+      const rangeDesc = buildFilterDescription(fromVal, toVal, schoolVal, personaVal);
       hintEl.textContent = rows.length
         ? `Showing ${rows.length.toLocaleString()} ${rows.length === 1 ? "entry" : "entries"}${rangeDesc}`
         : `No entries${rangeDesc}`;
@@ -1783,8 +1834,10 @@ by: <strong>${escHtml(data.updatedBy || "—")}</strong>`;
 
     document.getElementById("subApplyFilterBtn").addEventListener("click", renderSubmissions);
     document.getElementById("subClearFilterBtn").addEventListener("click", () => {
-      document.getElementById("subFilterFrom").value = "";
-      document.getElementById("subFilterTo").value   = "";
+      document.getElementById("subFilterFrom").value    = "";
+      document.getElementById("subFilterTo").value      = "";
+      document.getElementById("subFilterSchool").value  = "";
+      document.getElementById("subFilterPersona").value = "";
       renderSubmissions();
     });
     document.getElementById("subFilterFrom").addEventListener("change", () => {
@@ -1799,11 +1852,14 @@ by: <strong>${escHtml(data.updatedBy || "—")}</strong>`;
     document.getElementById("subDeleteAllBtn").addEventListener("click", () => {
       const rows = getFilteredSubmissions();
       if (!rows.length) return;
-      const fromVal = document.getElementById("subFilterFrom").value;
-      const toVal   = document.getElementById("subFilterTo").value;
-      const rangeDesc = fromVal || toVal
-        ? ` from ${fromVal || "the beginning"} to ${toVal || "now"}`
-        : " (no date filter is set — this is every entry in the database)";
+      const fromVal    = document.getElementById("subFilterFrom").value;
+      const toVal      = document.getElementById("subFilterTo").value;
+      const schoolVal  = document.getElementById("subFilterSchool").value;
+      const personaVal = document.getElementById("subFilterPersona").value;
+      const hasFilter = fromVal || toVal || schoolVal || personaVal;
+      const rangeDesc = hasFilter
+        ? buildFilterDescription(fromVal, toVal, schoolVal, personaVal)
+        : " (no filters are set — this is every entry in the database)";
       openConfirmModal({
         title: `Delete ${rows.length} ${rows.length === 1 ? "entry" : "entries"}?`,
         body: `This will permanently delete all ${rows.length} submission${rows.length === 1 ? "" : "s"} currently shown${rangeDesc}. This cannot be undone.`,
