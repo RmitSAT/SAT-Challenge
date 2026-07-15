@@ -62,6 +62,60 @@
     }
     .panel.active { display: flex; }
 
+    /* Dashboard panel hosts a tab nav + full-width tab content, not a single centered card */
+    #dashPanel.panel { padding: 0; }
+    #dashPanel.panel.active { display: block; }
+
+    /* ── Tab navigation ── */
+    .tabnav {
+      background: #fff;
+      border-bottom: 1px solid rgba(13,25,133,0.08);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+    }
+    .hamburger-btn {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 1.35rem;
+      padding: 12px 16px;
+      cursor: pointer;
+      color: var(--navy);
+      line-height: 1;
+    }
+    .tabnav-list {
+      display: flex;
+      gap: 2px;
+      overflow-x: auto;
+      flex: 1;
+      scrollbar-width: none;
+      padding: 0 8px;
+    }
+    .tabnav-list::-webkit-scrollbar { display: none; }
+    .tab-btn {
+      font-family: var(--font);
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: #667;
+      background: transparent;
+      border: none;
+      border-bottom: 3px solid transparent;
+      padding: 15px 14px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: color 0.15s, border-color 0.15s, background 0.15s;
+    }
+    .tab-btn:hover { color: var(--navy); }
+    .tab-btn.active { color: var(--navy); border-bottom-color: var(--red); }
+
+    .tab-panel { display: none; padding: 26px 20px 60px; }
+    .tab-panel.active { display: block; }
+    .tab-panel .card { max-width: 720px; margin: 0 auto; box-shadow: none; border: 1px solid rgba(13,25,133,0.08); }
+    .tab-panel.tab-wide .card { max-width: 1080px; }
+
     .card {
       background: #fff;
       border-radius: 24px;
@@ -576,6 +630,28 @@
       .data-card-thumb { width: 28px; height: 50px; }
       .trend-chart { gap: 10px; }
       .modal-box { padding: 22px 18px; }
+
+      /* Tab nav collapses into a hamburger-triggered dropdown */
+      .tabnav { position: relative; }
+      .hamburger-btn { display: block; }
+      .tabnav-list {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        flex-direction: column;
+        background: #fff;
+        box-shadow: 0 14px 32px rgba(13,25,133,0.18);
+        padding: 8px;
+        gap: 2px;
+        max-height: 70vh;
+        overflow-y: auto;
+      }
+      .tabnav-list.open { display: flex; }
+      .tab-btn { border-bottom: none; border-radius: 10px; text-align: left; padding: 14px 14px; }
+      .tab-btn.active { background: rgba(230,0,40,0.08); }
+      .tab-panel { padding: 18px 12px 50px; }
     }
   </style>
 </head>
@@ -740,6 +816,19 @@
 
   <!-- ── DASHBOARD PANEL ── -->
   <main class="panel" id="dashPanel">
+    <nav class="tabnav">
+      <button class="hamburger-btn" id="hamburgerBtn" type="button" aria-label="Menu">☰</button>
+      <div class="tabnav-list" id="tabnavList">
+        <button class="tab-btn active" data-tab="tags"            type="button">🏷️ Campaign Tags</button>
+        <button class="tab-btn"        data-tab="counters"        type="button">🔢 Counters</button>
+        <button class="tab-btn"        data-tab="submissions"     type="button">📊 Submissions</button>
+        <button class="tab-btn"        data-tab="shareanalytics"  type="button">📈 Share Analytics</button>
+        <button class="tab-btn"        data-tab="courses"         type="button">🎓 Courses</button>
+        <button class="tab-btn"        data-tab="triplemates"     type="button">🤝 TripleMates</button>
+      </div>
+    </nav>
+
+    <div class="tab-panel active" id="tab-tags">
     <div class="card">
       <h1 class="card-title">Campaign Tags</h1>
       <p class="card-sub">
@@ -767,9 +856,11 @@
       </div>
 
       <div class="meta-info" id="metaInfo"></div>
+    </div>
+    </div>
 
-      <!-- ── Student Counter ── -->
-      <div class="divider"></div>
+    <div class="tab-panel" id="tab-counters">
+    <div class="card">
       <h2 class="section-title">Student Counter</h2>
       <p class="section-sub">Set the base number shown on the welcome screen. The quiz app auto-adds +1 per result view. Total displayed = Base + live completions.</p>
 
@@ -814,9 +905,11 @@
         </div>
       </div>
       <div class="msg" id="personaCounterMsg"></div>
+    </div>
+    </div>
 
-      <!-- ── Student Submissions & Analytics ── -->
-      <div class="divider"></div>
+    <div class="tab-panel tab-wide" id="tab-submissions">
+    <div class="card">
       <h2 class="section-title">Student Submissions</h2>
       <p class="section-sub">Every quiz completion saved to the database. Filter by date, review trends, and remove test or duplicate entries.</p>
 
@@ -918,9 +1011,11 @@
         </table>
       </div>
       <div class="msg" id="submissionsMsg"></div>
+    </div>
+    </div>
 
-      <!-- ── Share Click Analytics ── -->
-      <div class="divider"></div>
+    <div class="tab-panel" id="tab-shareanalytics">
+    <div class="card">
       <h2 class="section-title">Share Click Analytics</h2>
       <p class="section-sub">Real-time count of how many students clicked each share button. Updates live as clicks come in.</p>
 
@@ -972,9 +1067,11 @@
         <strong id="rangeFb">0</strong> FB &nbsp;·&nbsp;
         <strong id="rangeTotal">0</strong> total
       </div>
+    </div>
+    </div>
 
-      <!-- ── Course Match Cards ── -->
-      <div class="divider"></div>
+    <div class="tab-panel" id="tab-courses">
+    <div class="card">
       <h2 class="section-title">Course Match Cards</h2>
       <p class="section-sub">Add RMIT programs for each school. Students see 3 randomly chosen from their persona's pool after the quiz. Add as many as you like.</p>
 
@@ -1011,9 +1108,11 @@
         <div class="course-list" id="sset-course-list"><span class="course-empty">No courses added yet</span></div>
       </div>
       <div class="msg" id="coursesMsg"></div>
+    </div>
+    </div>
 
-      <!-- ── TripleMates Game ── -->
-      <div class="divider"></div>
+    <div class="tab-panel" id="tab-triplemates">
+    <div class="card">
       <h2 class="section-title">TripleMates Game</h2>
       <p class="section-sub">Enable so students from TBS, SCD, and SSET can find each other using 7-character codes. Disable after the event to stop new registrations.</p>
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap">
@@ -1023,7 +1122,7 @@
       </div>
       <p class="input-hint" id="tmTrioCount">Trios formed: —</p>
       <div class="msg" id="tmAdminMsg"></div>
-
+    </div>
     </div>
   </main>
 
@@ -1057,6 +1156,24 @@
       document.getElementById(id).classList.add("active");
     }
 
+    // ── Dashboard tab switching ───────────────────────────────
+    const VALID_TABS = ["tags", "counters", "submissions", "shareanalytics", "courses", "triplemates"];
+    function showTab(tabId) {
+      if (!VALID_TABS.includes(tabId)) tabId = VALID_TABS[0];
+      document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      document.getElementById(`tab-${tabId}`).classList.add("active");
+      document.querySelectorAll(`.tab-btn[data-tab="${tabId}"]`).forEach(b => b.classList.add("active"));
+      document.getElementById("tabnavList").classList.remove("open");
+      try { localStorage.setItem("adminActiveTab", tabId); } catch (_) {}
+    }
+    document.querySelectorAll(".tab-btn").forEach(btn => {
+      btn.addEventListener("click", () => showTab(btn.dataset.tab));
+    });
+    document.getElementById("hamburgerBtn").addEventListener("click", () => {
+      document.getElementById("tabnavList").classList.toggle("open");
+    });
+
     // ── Firebase init ────────────────────────────────────────
     let db, auth;
 
@@ -1069,6 +1186,9 @@
       auth.onAuthStateChanged(user => {
         if (user) {
           showPanel("dashPanel");
+          let savedTab = "tags";
+          try { savedTab = localStorage.getItem("adminActiveTab") || "tags"; } catch (_) {}
+          showTab(savedTab);
           document.getElementById("logoutBtn").style.display = "block";
           loadTags();
           loadCounter();
