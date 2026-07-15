@@ -863,7 +863,7 @@
     playSlotSound();
     [0,1,2].forEach(i=>document.getElementById(`col${i}`).classList.add("pre-spin"));
     let countdown=3; status.className="spin-status countdown"; status.textContent=countdown;
-    const cd=setInterval(()=>{ if(--countdown>0) status.textContent=countdown; else clearInterval(cd); },2000);
+    const cd=setInterval(()=>{ if(--countdown>0) status.textContent=countdown; else clearInterval(cd); },1000);
     spinCancelFns.push(()=>clearInterval(cd));
     const t1=setTimeout(()=>{
       status.className="spin-status"; status.textContent="Spinning…";
@@ -879,7 +879,7 @@
           });
         },acc); return ()=>clearTimeout(t);
       }));
-    },6000);
+    },3000);
     spinCancelFns.push(()=>clearTimeout(t1));
   }
 
