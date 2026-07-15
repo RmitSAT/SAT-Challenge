@@ -1691,6 +1691,8 @@
     let uploadedImageData = "";
     let _storyChallengeModalTimer = null;
     let _shareExitArmedUntil = 0;
+    let _sessionStartT = Date.now();
+    let _currentResultKey = null;
 
     function getParticipantToken() {
       const existing = localStorage.getItem("rmitParticipantToken");
@@ -2039,6 +2041,8 @@
       answers = [];
       uploadedImageData = "";
       _hasCountedThisSession = false;
+      _currentResultKey = null;
+      _sessionStartT = Date.now();
       document.getElementById("progressFill").style.width = "0%";
 
       photoInput.value = "";
@@ -2343,6 +2347,7 @@
             }, "image/png");
           });
         }
+        markDownloaded();
       } catch (error) {
         alert("Download failed. Make sure the page is served from a web host (not opened as a local file) and all image files are in the same folder.");
         console.error(error);
@@ -2438,6 +2443,7 @@
       if (btn.disabled) return;
       markChallengePending(platform);
       logShareClick(platform); // log before async work so even aborted shares are counted
+      markShared(platform);
       const originalHTML = btn.innerHTML;
       btn.disabled = true;
       btn.textContent = "Preparing…";
@@ -2715,8 +2721,10 @@
           name: getStudentName() || "Guest",
           school: getSchoolName(),
           persona,
-          t: Date.now()
+          t: Date.now(),
+          timeSpentMs: getElapsedSessionMs()
         });
+        _currentResultKey = ref.key;
         // Save a compressed card image so the prize spin can display real student cards
         let imgData = null;
         try {
@@ -2734,6 +2742,49 @@
         }
       } catch (_) {}
     }
+    // ── Engagement tracking: time on site, downloads, shares ──
+    function getElapsedSessionMs() { return Date.now() - _sessionStartT; }
+    function bumpTimeSpent() {
+      if (!_currentResultKey) return;
+      try {
+        if (typeof firebase === "undefined" || !firebase.apps || !firebase.apps.length) return;
+        firebase.database().ref(`studentResults/${_currentResultKey}/timeSpentMs`).set(getElapsedSessionMs());
+      } catch (_) {}
+    }
+    function markDownloaded() {
+      if (!_currentResultKey) return;
+      try {
+        if (typeof firebase === "undefined" || !firebase.apps || !firebase.apps.length) return;
+        const ref = firebase.database().ref(`studentResults/${_currentResultKey}`);
+        ref.update({ downloaded: true });
+        ref.child("downloadedAt").transaction(cur => cur || Date.now());
+        ref.child("downloadCount").transaction(cur => (cur || 0) + 1);
+        bumpTimeSpent();
+      } catch (_) {}
+    }
+    function markShared(platform) {
+      if (!_currentResultKey) return;
+      try {
+        if (typeof firebase === "undefined" || !firebase.apps || !firebase.apps.length) return;
+        const ref = firebase.database().ref(`studentResults/${_currentResultKey}`);
+        ref.update({ shared: true, [`sharedPlatforms/${platform}`]: true });
+        ref.child("sharedAt").transaction(cur => cur || Date.now());
+        ref.child("shareCount").transaction(cur => (cur || 0) + 1);
+        bumpTimeSpent();
+      } catch (_) {}
+    }
+    // Best-effort final time-spent capture on tab close/hide — fetch(keepalive)
+    // survives page unload, unlike a normal Firebase SDK write.
+    function beaconFinalTimeSpent() {
+      if (!_currentResultKey) return;
+      try {
+        if (typeof FIREBASE_CONFIG === "undefined" || !FIREBASE_CONFIG.databaseURL) return;
+        const url = `${FIREBASE_CONFIG.databaseURL}/studentResults/${_currentResultKey}/timeSpentMs.json`;
+        fetch(url, { method: "PUT", body: JSON.stringify(getElapsedSessionMs()), keepalive: true }).catch(() => {});
+      } catch (_) {}
+    }
+    window.addEventListener("pagehide", beaconFinalTimeSpent);
+    document.addEventListener("visibilitychange", () => { if (document.hidden) beaconFinalTimeSpent(); });
     function logShareClick(platform) {
       try {
         if (typeof firebase === "undefined" || !firebase.apps || !firebase.apps.length) return;

@@ -459,6 +459,124 @@
       display: none;
     }
     .analytics-range-total strong { color: var(--navy); }
+
+    /* ── Persona chips (match prize.html colors) ── */
+    .persona-chip { display: inline-block; font-size: 0.7rem; font-weight: 900; letter-spacing: 0.05em; border-radius: 7px; padding: 4px 10px; color: #fff; white-space: nowrap; }
+    .persona-chip.TBS  { background: #a0001b; }
+    .persona-chip.SCD  { background: #0d1985; }
+    .persona-chip.SSET { background: #123c69; }
+
+    /* ── Submissions summary stat modifiers ── */
+    .submissions-summary { grid-template-columns: repeat(auto-fit, minmax(84px, 1fr)); }
+    .analytics-num.persona-tbs  { color: #a0001b; }
+    .analytics-num.persona-scd  { color: #0d1985; }
+    .analytics-num.persona-sset { color: #123c69; }
+
+    /* ── Engagement summary (share / download / time on site) ── */
+    .engagement-summary { grid-template-columns: repeat(3, 1fr); margin-bottom: 8px; }
+    .analytics-lbl-pct { color: #aaa; font-weight: 800; text-transform: none; letter-spacing: 0; }
+    .engagement-breakdown { font-size: 0.78rem; color: #888; margin-bottom: 20px; text-align: center; line-height: 1.6; }
+    .engagement-breakdown strong { color: var(--navy); }
+
+    /* ── Charts ── */
+    .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px; }
+    .chart-card-wide { grid-column: 1 / -1; }
+    .chart-card { background: rgba(13,25,133,0.04); border-radius: 16px; padding: 16px; }
+    .chart-title {
+      font-size: 0.78rem; font-weight: 900; text-transform: uppercase;
+      letter-spacing: 0.05em; color: var(--navy); margin-bottom: 14px;
+    }
+    .chart-empty { font-size: 0.85rem; color: #aaa; padding: 20px 0; text-align: center; }
+
+    /* Donut */
+    .donut-wrap { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+    .donut { width: 118px; height: 118px; border-radius: 50%; position: relative; flex-shrink: 0; background: #eef0f8; }
+    .donut-center {
+      position: absolute; inset: 18%; background: #fff; border-radius: 50%;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      font-size: 1.25rem; font-weight: 900; color: var(--navy);
+      box-shadow: 0 2px 10px rgba(13,25,133,0.08);
+    }
+    .donut-center span { font-size: 0.6rem; font-weight: 800; color: #999; text-transform: uppercase; letter-spacing: 0.05em; }
+    .donut-legend { display: flex; flex-direction: column; gap: 8px; flex: 1; min-width: 130px; }
+    .legend-item { display: flex; align-items: center; gap: 8px; font-size: 0.82rem; font-weight: 700; color: #333; }
+    .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .legend-label { min-width: 40px; font-weight: 900; }
+    .legend-value { color: #888; font-weight: 700; margin-left: auto; }
+
+    /* Top schools bar list */
+    .bar-list { display: flex; flex-direction: column; gap: 10px; }
+    .bar-row { display: grid; grid-template-columns: 100px 1fr 30px; align-items: center; gap: 10px; }
+    .bar-label { font-size: 0.8rem; font-weight: 800; color: #333; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .bar-track { background: rgba(13,25,133,0.08); border-radius: 999px; height: 10px; overflow: hidden; }
+    .bar-fill { background: var(--navy); height: 100%; border-radius: 999px; transition: width 0.3s ease; }
+    .bar-value { font-size: 0.8rem; font-weight: 900; color: var(--navy); text-align: right; }
+
+    /* Trend chart */
+    .trend-chart-wrap { overflow-x: auto; padding-bottom: 4px; }
+    .trend-chart { display: flex; align-items: flex-end; gap: 14px; min-height: 170px; padding-top: 10px; }
+    .trend-col { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
+    .trend-bar {
+      width: 24px; display: flex; flex-direction: column-reverse; align-items: center;
+      border-radius: 6px 6px 0 0; overflow: hidden; background: rgba(13,25,133,0.05); min-height: 4px;
+    }
+    .trend-seg { width: 100%; }
+    .trend-seg.tbs  { background: #a0001b; }
+    .trend-seg.scd  { background: #0d1985; }
+    .trend-seg.sset { background: #123c69; }
+    .trend-total { font-size: 0.72rem; font-weight: 900; color: var(--navy); margin-top: 6px; }
+    .trend-date { font-size: 0.66rem; font-weight: 700; color: #999; margin-top: 2px; white-space: nowrap; }
+
+    /* Table toolbar */
+    .table-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+    .table-toolbar-hint { font-size: 0.82rem; color: #666; font-weight: 700; }
+
+    /* Data table specifics */
+    .data-card-thumb { width: 34px; height: 60px; object-fit: cover; border-radius: 6px; display: block; background: #eef0f8; }
+    .data-card-thumb-empty { display: flex; align-items: center; justify-content: center; color: #bbb; font-size: 0.8rem; }
+    .flag-yes { color: #1a7f3c; font-weight: 900; font-size: 0.95rem; }
+    .flag-no  { color: #ccc; font-weight: 900; font-size: 0.95rem; }
+    .time-cell { white-space: nowrap; color: #555; }
+    .btn-row-delete {
+      font-size: 0.75rem; color: var(--red);
+      background: rgba(230,0,40,0.08); border: 1px solid rgba(230,0,40,0.18);
+      border-radius: 8px; padding: 5px 10px; cursor: pointer;
+      font-family: var(--font); font-weight: 800; white-space: nowrap; transition: background 0.15s;
+    }
+    .btn-row-delete:hover { background: rgba(230,0,40,0.16); }
+
+    /* ── Confirm modal ── */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(13,15,35,0.55);
+      align-items: center; justify-content: center; z-index: 1000; padding: 20px;
+      backdrop-filter: blur(2px);
+    }
+    .modal-overlay.active { display: flex; }
+    .modal-box { background: #fff; border-radius: 20px; padding: 28px 26px; width: 100%; max-width: 420px; box-shadow: 0 20px 60px rgba(0,0,0,0.25); }
+    .modal-title { font-size: 1.1rem; font-weight: 900; color: var(--navy); margin-bottom: 10px; }
+    .modal-body { font-size: 0.9rem; color: #444; line-height: 1.55; margin-bottom: 22px; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 10px; }
+    .btn-modal-cancel {
+      font-family: var(--font); font-size: 0.88rem; font-weight: 900;
+      padding: 11px 18px; background: #eef0f8; color: #333;
+      border: none; border-radius: 12px; cursor: pointer; transition: opacity 0.18s;
+    }
+    .btn-modal-cancel:hover { opacity: 0.8; }
+    .btn-modal-danger {
+      font-family: var(--font); font-size: 0.88rem; font-weight: 900;
+      padding: 11px 18px; background: var(--red); color: #fff;
+      border: none; border-radius: 12px; cursor: pointer; transition: opacity 0.18s;
+    }
+    .btn-modal-danger:hover { opacity: 0.88; }
+    .btn-modal-danger:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    @media (max-width: 600px) {
+      .charts-grid { grid-template-columns: 1fr; }
+      .bar-row { grid-template-columns: 76px 1fr 26px; }
+      .data-card-thumb { width: 28px; height: 50px; }
+      .trend-chart { gap: 10px; }
+      .modal-box { padding: 22px 18px; }
+    }
   </style>
 </head>
 <body>
@@ -697,6 +815,110 @@
       </div>
       <div class="msg" id="personaCounterMsg"></div>
 
+      <!-- ── Student Submissions & Analytics ── -->
+      <div class="divider"></div>
+      <h2 class="section-title">Student Submissions</h2>
+      <p class="section-sub">Every quiz completion saved to the database. Filter by date, review trends, and remove test or duplicate entries.</p>
+
+      <div class="analytics-summary submissions-summary" id="submissionsSummary">
+        <div class="analytics-stat">
+          <span class="analytics-num" id="subTotalCount">—</span>
+          <span class="analytics-lbl">Entries</span>
+        </div>
+        <div class="analytics-stat">
+          <span class="analytics-num" id="subSchoolCount">—</span>
+          <span class="analytics-lbl">High schools</span>
+        </div>
+        <div class="analytics-stat">
+          <span class="analytics-num persona-tbs" id="subTbsCount">—</span>
+          <span class="analytics-lbl">TBS</span>
+        </div>
+        <div class="analytics-stat">
+          <span class="analytics-num persona-scd" id="subScdCount">—</span>
+          <span class="analytics-lbl">SCD</span>
+        </div>
+        <div class="analytics-stat">
+          <span class="analytics-num persona-sset" id="subSsetCount">—</span>
+          <span class="analytics-lbl">SSET</span>
+        </div>
+      </div>
+
+      <div class="analytics-summary engagement-summary" id="engagementSummary">
+        <div class="analytics-stat">
+          <span class="analytics-num" id="subSharedCount">—</span>
+          <span class="analytics-lbl">Shared <span class="analytics-lbl-pct" id="subSharedPct"></span></span>
+        </div>
+        <div class="analytics-stat">
+          <span class="analytics-num" id="subDownloadedCount">—</span>
+          <span class="analytics-lbl">Downloaded <span class="analytics-lbl-pct" id="subDownloadedPct"></span></span>
+        </div>
+        <div class="analytics-stat">
+          <span class="analytics-num" id="subAvgTime">—</span>
+          <span class="analytics-lbl">Avg. time on site</span>
+        </div>
+      </div>
+      <p class="engagement-breakdown" id="subAvgTimeByPersona">No time data yet</p>
+
+      <div class="analytics-filter">
+        <div class="analytics-filter-group">
+          <label for="subFilterFrom">From date</label>
+          <input type="date" id="subFilterFrom" />
+        </div>
+        <div class="analytics-filter-group">
+          <label for="subFilterTo">To date</label>
+          <input type="date" id="subFilterTo" />
+        </div>
+        <button class="btn-inline" id="subApplyFilterBtn" type="button">Filter</button>
+        <button class="btn-inline btn-danger" id="subClearFilterBtn" type="button">Clear</button>
+      </div>
+
+      <div class="charts-grid">
+        <div class="chart-card">
+          <div class="chart-title">Persona distribution</div>
+          <div class="donut-wrap">
+            <div class="donut" id="personaDonut"></div>
+            <div class="donut-legend" id="personaDonutLegend"></div>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Top high schools</div>
+          <div class="bar-list" id="topSchoolsChart"><div class="chart-empty">No data</div></div>
+        </div>
+        <div class="chart-card chart-card-wide">
+          <div class="chart-title">Daily submissions trend</div>
+          <div class="trend-chart-wrap">
+            <div class="trend-chart" id="trendChart"><div class="chart-empty">No data</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-toolbar">
+        <span class="table-toolbar-hint" id="subRangeHint">Loading…</span>
+        <button class="btn-inline btn-danger" id="subDeleteAllBtn" type="button" disabled>🗑 Delete all shown</button>
+      </div>
+
+      <div class="analytics-table-wrap">
+        <table class="analytics-table data-table">
+          <thead>
+            <tr>
+              <th>Card</th>
+              <th>Name</th>
+              <th>High school</th>
+              <th>Persona</th>
+              <th>Shared</th>
+              <th>Downloaded</th>
+              <th>Time on site</th>
+              <th>Date</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="submissionsTableBody">
+            <tr><td colspan="9" class="analytics-empty">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="msg" id="submissionsMsg"></div>
+
       <!-- ── Share Click Analytics ── -->
       <div class="divider"></div>
       <h2 class="section-title">Share Click Analytics</h2>
@@ -805,6 +1027,18 @@
     </div>
   </main>
 
+  <!-- ── Confirm modal (shared) ── -->
+  <div class="modal-overlay" id="confirmModalOverlay">
+    <div class="modal-box">
+      <h3 class="modal-title" id="confirmModalTitle">Confirm</h3>
+      <p class="modal-body" id="confirmModalBody">Are you sure?</p>
+      <div class="modal-actions">
+        <button class="btn-modal-cancel" id="confirmModalCancelBtn" type="button">Cancel</button>
+        <button class="btn-modal-danger" id="confirmModalConfirmBtn" type="button">Delete</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Firebase SDKs -->
   <script src="firebase-config.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -842,6 +1076,7 @@
           loadCourses();
           loadAnalytics();
           loadTriplemateSetting();
+          loadStudentResults();
         } else {
           showPanel("loginPanel");
           document.getElementById("logoutBtn").style.display = "none";
@@ -1209,6 +1444,293 @@ by: <strong>${escHtml(data.updatedBy || "—")}</strong>`;
         msgEl.textContent = "Delete failed: " + e.message; msgEl.className = "msg error";
       }
     }
+
+    // ── Student Submissions & Analytics ─────────────────────
+    let _allStudentResults = [];
+    let _pendingConfirmAction = null;
+
+    function loadStudentResults() {
+      db.ref("studentResults").on("value", snapshot => {
+        _allStudentResults = [];
+        snapshot.forEach(child => {
+          const v = child.val();
+          if (v) _allStudentResults.push({ id: child.key, ...v });
+        });
+        renderSubmissions();
+      });
+    }
+
+    function getFilteredSubmissions() {
+      const fromVal = document.getElementById("subFilterFrom").value;
+      const toVal   = document.getElementById("subFilterTo").value;
+      let rows = _allStudentResults.slice();
+      if (fromVal) {
+        const fromMs = new Date(fromVal + "T00:00:00").getTime();
+        rows = rows.filter(r => typeof r.t === "number" && r.t >= fromMs);
+      }
+      if (toVal) {
+        const toMs = new Date(toVal + "T23:59:59.999").getTime();
+        rows = rows.filter(r => typeof r.t === "number" && r.t <= toMs);
+      }
+      rows.sort((a, b) => (b.t || 0) - (a.t || 0));
+      return rows;
+    }
+
+    function renderSubmissions() {
+      const rows = getFilteredSubmissions();
+      const fromVal = document.getElementById("subFilterFrom").value;
+      const toVal   = document.getElementById("subFilterTo").value;
+
+      const schools = new Set();
+      let tbs = 0, scd = 0, sset = 0;
+      let sharedCount = 0, downloadedCount = 0;
+      let timeSum = 0, timeCount = 0;
+      const timeByPersona = { TBS: { sum: 0, count: 0 }, SCD: { sum: 0, count: 0 }, SSET: { sum: 0, count: 0 } };
+      rows.forEach(r => {
+        if (r.school && r.school.trim()) schools.add(r.school.trim().toLowerCase());
+        if (r.persona === "TBS") tbs++;
+        else if (r.persona === "SCD") scd++;
+        else if (r.persona === "SSET") sset++;
+        if (r.shared) sharedCount++;
+        if (r.downloaded) downloadedCount++;
+        if (typeof r.timeSpentMs === "number" && r.timeSpentMs >= 0) {
+          timeSum += r.timeSpentMs; timeCount++;
+          if (timeByPersona[r.persona]) { timeByPersona[r.persona].sum += r.timeSpentMs; timeByPersona[r.persona].count++; }
+        }
+      });
+      document.getElementById("subTotalCount").textContent  = rows.length.toLocaleString();
+      document.getElementById("subSchoolCount").textContent = schools.size.toLocaleString();
+      document.getElementById("subTbsCount").textContent    = tbs.toLocaleString();
+      document.getElementById("subScdCount").textContent    = scd.toLocaleString();
+      document.getElementById("subSsetCount").textContent   = sset.toLocaleString();
+
+      document.getElementById("subSharedCount").textContent     = sharedCount.toLocaleString();
+      document.getElementById("subSharedPct").textContent       = rows.length ? `(${Math.round(sharedCount / rows.length * 100)}%)` : "";
+      document.getElementById("subDownloadedCount").textContent = downloadedCount.toLocaleString();
+      document.getElementById("subDownloadedPct").textContent   = rows.length ? `(${Math.round(downloadedCount / rows.length * 100)}%)` : "";
+      document.getElementById("subAvgTime").textContent         = timeCount ? formatDuration(timeSum / timeCount) : "—";
+
+      const byPersonaEl = document.getElementById("subAvgTimeByPersona");
+      byPersonaEl.innerHTML = timeCount
+        ? ["TBS", "SCD", "SSET"].map(k => {
+            const d = timeByPersona[k];
+            return `<strong>${k}</strong> ${d.count ? formatDuration(d.sum / d.count) : "—"} avg`;
+          }).join("  ·  ")
+        : "No time data yet";
+
+      renderPersonaDonut({ TBS: tbs, SCD: scd, SSET: sset });
+      renderTopSchools(rows);
+      renderTrendChart(rows);
+      renderSubmissionsTable(rows);
+
+      const hintEl = document.getElementById("subRangeHint");
+      const delBtn = document.getElementById("subDeleteAllBtn");
+      const rangeDesc = fromVal || toVal ? ` (${fromVal || "…"} → ${toVal || "…"})` : "";
+      hintEl.textContent = rows.length
+        ? `Showing ${rows.length.toLocaleString()} ${rows.length === 1 ? "entry" : "entries"}${rangeDesc}`
+        : `No entries${rangeDesc}`;
+      delBtn.textContent = `🗑 Delete all shown (${rows.length})`;
+      delBtn.disabled = rows.length === 0;
+    }
+
+    function renderPersonaDonut(counts) {
+      const total = counts.TBS + counts.SCD + counts.SSET;
+      const donut  = document.getElementById("personaDonut");
+      const legend = document.getElementById("personaDonutLegend");
+      const segments = [
+        { key: "TBS",  color: "#a0001b", value: counts.TBS  },
+        { key: "SCD",  color: "#0d1985", value: counts.SCD  },
+        { key: "SSET", color: "#123c69", value: counts.SSET }
+      ];
+      if (!total) {
+        donut.style.background = "#eef0f8";
+        donut.innerHTML = '<div class="donut-center">0<span>total</span></div>';
+        legend.innerHTML = '<span class="course-empty">No data yet</span>';
+        return;
+      }
+      let acc = 0;
+      const stops = segments.map(s => {
+        const start = (acc / total) * 360; acc += s.value;
+        const end = (acc / total) * 360;
+        return `${s.color} ${start}deg ${end}deg`;
+      }).join(", ");
+      donut.style.background = `conic-gradient(${stops})`;
+      donut.innerHTML = `<div class="donut-center">${total}<span>total</span></div>`;
+      legend.innerHTML = segments.map(s => `
+        <div class="legend-item">
+          <span class="legend-dot" style="background:${s.color}"></span>
+          <span class="legend-label">${s.key}</span>
+          <span class="legend-value">${s.value} (${Math.round(s.value / total * 100)}%)</span>
+        </div>
+      `).join("");
+    }
+
+    function renderTopSchools(rows) {
+      const counts = {};
+      rows.forEach(r => {
+        const name = (r.school || "").trim() || "Unknown";
+        counts[name] = (counts[name] || 0) + 1;
+      });
+      const entries = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 8);
+      const el = document.getElementById("topSchoolsChart");
+      if (!entries.length) { el.innerHTML = '<div class="chart-empty">No data</div>'; return; }
+      const max = entries[0][1];
+      el.innerHTML = entries.map(([name, count]) => `
+        <div class="bar-row">
+          <span class="bar-label" title="${escHtml(name)}">${escHtml(name)}</span>
+          <div class="bar-track"><div class="bar-fill" style="width:${(count / max * 100)}%"></div></div>
+          <span class="bar-value">${count}</span>
+        </div>
+      `).join("");
+    }
+
+    function renderTrendChart(rows) {
+      const byDate = {};
+      rows.forEach(r => {
+        if (typeof r.t !== "number") return;
+        const d = new Date(r.t).toLocaleDateString("en-CA");
+        if (!byDate[d]) byDate[d] = { TBS: 0, SCD: 0, SSET: 0 };
+        if (byDate[d][r.persona] !== undefined) byDate[d][r.persona]++;
+      });
+      const dates = Object.keys(byDate).sort();
+      const el = document.getElementById("trendChart");
+      if (!dates.length) { el.innerHTML = '<div class="chart-empty">No data</div>'; return; }
+      const maxTotal = Math.max(...dates.map(d => byDate[d].TBS + byDate[d].SCD + byDate[d].SSET));
+      const h = v => maxTotal ? (v > 0 ? Math.max(4, Math.round(v / maxTotal * 130)) : 0) : 0;
+      el.innerHTML = dates.map(d => {
+        const c = byDate[d], total = c.TBS + c.SCD + c.SSET;
+        return `<div class="trend-col" title="${d}: ${total} total — TBS ${c.TBS}, SCD ${c.SCD}, SSET ${c.SSET}">
+          <div class="trend-bar">
+            <div class="trend-seg tbs"  style="height:${h(c.TBS)}px"></div>
+            <div class="trend-seg scd"  style="height:${h(c.SCD)}px"></div>
+            <div class="trend-seg sset" style="height:${h(c.SSET)}px"></div>
+          </div>
+          <div class="trend-total">${total}</div>
+          <div class="trend-date">${d.slice(5)}</div>
+        </div>`;
+      }).join("");
+    }
+
+    function formatDuration(ms) {
+      if (typeof ms !== "number" || ms < 0 || isNaN(ms)) return "—";
+      const totalSec = Math.round(ms / 1000);
+      const m = Math.floor(totalSec / 60);
+      const s = totalSec % 60;
+      return m === 0 ? `${s}s` : `${m}m ${s}s`;
+    }
+
+    function renderSubmissionsTable(rows) {
+      const tbody = document.getElementById("submissionsTableBody");
+      if (!rows.length) {
+        tbody.innerHTML = '<tr><td colspan="9" class="analytics-empty">No entries found</td></tr>';
+        return;
+      }
+      tbody.innerHTML = rows.map(r => {
+        const d = typeof r.t === "number" ? new Date(r.t) : null;
+        const dateStr = d ? `${d.toLocaleDateString()} ${d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}` : "—";
+        const persona = r.persona || "—";
+        const cardCell = r.img
+          ? `<img class="data-card-thumb" src="${r.img}" loading="lazy" alt="" />`
+          : `<div class="data-card-thumb data-card-thumb-empty">—</div>`;
+        const sharedCell     = r.shared     ? '<span class="flag-yes">✓</span>' : '<span class="flag-no">–</span>';
+        const downloadedCell = r.downloaded ? '<span class="flag-yes">✓</span>' : '<span class="flag-no">–</span>';
+        return `<tr>
+          <td>${cardCell}</td>
+          <td>${escHtml(r.name || "Guest")}</td>
+          <td>${escHtml(r.school || "—")}</td>
+          <td><span class="persona-chip ${escHtml(persona)}">${escHtml(persona)}</span></td>
+          <td>${sharedCell}</td>
+          <td>${downloadedCell}</td>
+          <td class="time-cell">${formatDuration(r.timeSpentMs)}</td>
+          <td>${dateStr}</td>
+          <td><button class="btn-row-delete" type="button" data-id="${escHtml(r.id)}" data-name="${escHtml(r.name || "Guest")}">Delete</button></td>
+        </tr>`;
+      }).join("");
+
+      tbody.querySelectorAll(".btn-row-delete").forEach(btn => {
+        btn.addEventListener("click", () => requestDeleteSubmission(btn.dataset.id, btn.dataset.name));
+      });
+    }
+
+    function requestDeleteSubmission(id, name) {
+      openConfirmModal({
+        title: "Delete this entry?",
+        body: `This will permanently delete ${name}'s submission (and their persona card) from the database. This cannot be undone.`,
+        confirmText: "Delete",
+        onConfirm: async () => { await db.ref(`studentResults/${id}`).remove(); }
+      });
+    }
+
+    document.getElementById("subApplyFilterBtn").addEventListener("click", renderSubmissions);
+    document.getElementById("subClearFilterBtn").addEventListener("click", () => {
+      document.getElementById("subFilterFrom").value = "";
+      document.getElementById("subFilterTo").value   = "";
+      renderSubmissions();
+    });
+    document.getElementById("subFilterFrom").addEventListener("change", () => {
+      const from = document.getElementById("subFilterFrom"), to = document.getElementById("subFilterTo");
+      if (to.value && to.value < from.value) to.value = from.value;
+    });
+    document.getElementById("subFilterTo").addEventListener("change", () => {
+      const from = document.getElementById("subFilterFrom"), to = document.getElementById("subFilterTo");
+      if (from.value && from.value > to.value) from.value = to.value;
+    });
+
+    document.getElementById("subDeleteAllBtn").addEventListener("click", () => {
+      const rows = getFilteredSubmissions();
+      if (!rows.length) return;
+      const fromVal = document.getElementById("subFilterFrom").value;
+      const toVal   = document.getElementById("subFilterTo").value;
+      const rangeDesc = fromVal || toVal
+        ? ` from ${fromVal || "the beginning"} to ${toVal || "now"}`
+        : " (no date filter is set — this is every entry in the database)";
+      openConfirmModal({
+        title: `Delete ${rows.length} ${rows.length === 1 ? "entry" : "entries"}?`,
+        body: `This will permanently delete all ${rows.length} submission${rows.length === 1 ? "" : "s"} currently shown${rangeDesc}. This cannot be undone.`,
+        confirmText: `Delete ${rows.length}`,
+        onConfirm: async () => {
+          const updates = {};
+          rows.forEach(r => { updates[`studentResults/${r.id}`] = null; });
+          await db.ref().update(updates);
+        }
+      });
+    });
+
+    // ── Confirm modal (shared) ───────────────────────────────
+    function openConfirmModal({ title, body, confirmText, onConfirm }) {
+      document.getElementById("confirmModalTitle").textContent = title;
+      document.getElementById("confirmModalBody").textContent  = body;
+      const confirmBtn = document.getElementById("confirmModalConfirmBtn");
+      confirmBtn.textContent = confirmText || "Delete";
+      confirmBtn.disabled = false;
+      _pendingConfirmAction = onConfirm;
+      document.getElementById("confirmModalOverlay").classList.add("active");
+    }
+    function closeConfirmModal() {
+      document.getElementById("confirmModalOverlay").classList.remove("active");
+      _pendingConfirmAction = null;
+    }
+    document.getElementById("confirmModalCancelBtn").addEventListener("click", closeConfirmModal);
+    document.getElementById("confirmModalOverlay").addEventListener("click", e => {
+      if (e.target.id === "confirmModalOverlay") closeConfirmModal();
+    });
+    document.addEventListener("keydown", e => {
+      if (e.key === "Escape") closeConfirmModal();
+    });
+    document.getElementById("confirmModalConfirmBtn").addEventListener("click", async () => {
+      const action = _pendingConfirmAction;
+      if (!action) return;
+      const btn = document.getElementById("confirmModalConfirmBtn");
+      const originalText = btn.textContent;
+      btn.disabled = true; btn.textContent = "Deleting…";
+      try {
+        await action();
+        closeConfirmModal();
+      } catch (e) {
+        document.getElementById("confirmModalBody").textContent = "Delete failed: " + e.message;
+        btn.disabled = false; btn.textContent = originalText;
+      }
+    });
 
     // ── TripleMates ───────────────────────────────────────────
     function loadTriplemateSetting() {
