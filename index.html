@@ -1199,14 +1199,14 @@
       <img class="page-bg" id="welcomeBg" src="homepage.png" alt="" />
 
       <div class="layer welcome-layer">
-        <h1 id="welcomeTitle">High School Highschool</h1>
+        <h1 id="welcomeTitle">Welcome Highschool</h1>
         <p class="lead" id="welcomeLead">Discover your RMIT vibe and receive a beautiful Persona Card to share on Instagram Story.</p>
 
         <div class="welcome-input-panel">
           <div class="input-stack">
             <div class="field">
               <label for="schoolInput" id="schoolInputLabel">High school name</label>
-              <input id="schoolInput" type="text" value="High School" placeholder="Enter your high school name" autocomplete="organization" maxlength="60" />
+              <input id="schoolInput" type="text" placeholder="Enter your high school name" autocomplete="organization" maxlength="60" />
             </div>
 
             <div class="field">
@@ -1447,7 +1447,8 @@
   <script>
     const content = {
       en: {
-        welcomeWithSchool: "{school} Highschool",
+        welcomeWithSchool: "Welcome {school} Highschool",
+        welcomeDefault: "Welcome Highschool",
         welcomeLead: "Discover your RMIT vibe and receive a beautiful Persona Card to share on Instagram Story.",
         schoolInputLabel: "High school name",
         schoolPlaceholder: "Enter your high school name",
@@ -1543,7 +1544,8 @@
         }
       },
       vi: {
-        welcomeWithSchool: "{school} Highschool",
+        welcomeWithSchool: "Chào mừng {school} Highschool",
+        welcomeDefault: "Chào mừng Highschool",
         welcomeLead: "Khám phá vibe của bạn tại RMIT và nhận một Persona Card thật đẹp để chia sẻ lên Instagram Story.",
         schoolInputLabel: "Tên trường THPT",
         schoolPlaceholder: "Nhập tên trường THPT",
@@ -1776,7 +1778,11 @@
     }
 
     function updateWelcomeTitle() {
-      setText("welcomeTitle", t().welcomeWithSchool.replace("{school}", getSchoolName()));
+      const typed = schoolInput.value.trim();
+      const title = typed
+        ? t().welcomeWithSchool.replace("{school}", typed)
+        : t().welcomeDefault;
+      setText("welcomeTitle", title);
     }
 
     function setLanguage(lang) {
