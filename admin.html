@@ -530,6 +530,16 @@
     .persona-chip.SCD  { background: #0d1985; }
     .persona-chip.SSET { background: #123c69; }
 
+    /* ── Feature toggles ── */
+    .feature-toggle-list { display: flex; flex-direction: column; gap: 12px; }
+    .feature-toggle-row {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+      background: rgba(13,25,133,0.04); border-radius: 14px; padding: 14px 16px;
+    }
+    .feature-toggle-info { display: flex; flex-direction: column; gap: 6px; min-width: 200px; }
+    .feature-toggle-name { font-size: 0.92rem; font-weight: 800; color: #1a1a2e; }
+    .feature-toggle-actions { display: flex; gap: 8px; flex-shrink: 0; }
+
     /* ── Submissions summary stat modifiers ── */
     .submissions-summary { grid-template-columns: repeat(auto-fit, minmax(84px, 1fr)); }
     .analytics-num.persona-tbs  { color: #a0001b; }
@@ -750,6 +760,10 @@
       ".read": true,
       ".write": "auth != null"
     },
+    "featureToggles": {
+      ".read": true,
+      ".write": "auth != null"
+    },
     "studentCounter": {
       ".read": true,
       ".write": true
@@ -873,6 +887,7 @@
       <div class="tabnav-list" id="tabnavList">
         <button class="tab-btn active" data-tab="tags"            type="button">🏷️ Campaign Tags</button>
         <button class="tab-btn"        data-tab="counters"        type="button">🔢 Counters</button>
+        <button class="tab-btn"        data-tab="features"        type="button">🎛️ Features</button>
         <button class="tab-btn"        data-tab="submissions"     type="button">📊 Submissions</button>
         <button class="tab-btn"        data-tab="shareanalytics"  type="button">📈 Share Analytics</button>
         <button class="tab-btn"        data-tab="courses"         type="button">🎓 Courses</button>
@@ -957,6 +972,61 @@
         </div>
       </div>
       <div class="msg" id="personaCounterMsg"></div>
+    </div>
+    </div>
+
+    <div class="tab-panel" id="tab-features">
+    <div class="card">
+      <h2 class="section-title">Feature Visibility</h2>
+      <p class="section-sub">Show or hide these features for students. Changes apply live on every device — no redeploy needed.</p>
+
+      <div class="feature-toggle-list">
+        <div class="feature-toggle-row">
+          <div class="feature-toggle-info">
+            <span class="feature-toggle-name">📸 Share to Instagram Story</span>
+            <span class="msg" id="ftIgShareBadge" style="margin:0">Status: loading…</span>
+          </div>
+          <div class="feature-toggle-actions">
+            <button class="btn-inline" data-toggle="igShare" data-value="true" type="button">Enable</button>
+            <button class="btn-inline btn-danger" data-toggle="igShare" data-value="false" type="button">Disable</button>
+          </div>
+        </div>
+
+        <div class="feature-toggle-row">
+          <div class="feature-toggle-info">
+            <span class="feature-toggle-name">📘 Share to Facebook Story</span>
+            <span class="msg" id="ftFbShareBadge" style="margin:0">Status: loading…</span>
+          </div>
+          <div class="feature-toggle-actions">
+            <button class="btn-inline" data-toggle="fbShare" data-value="true" type="button">Enable</button>
+            <button class="btn-inline btn-danger" data-toggle="fbShare" data-value="false" type="button">Disable</button>
+          </div>
+        </div>
+
+        <div class="feature-toggle-row">
+          <div class="feature-toggle-info">
+            <span class="feature-toggle-name">🔗 Share to a Friend</span>
+            <span class="msg" id="ftFriendShareBadge" style="margin:0">Status: loading…</span>
+          </div>
+          <div class="feature-toggle-actions">
+            <button class="btn-inline" data-toggle="friendShare" data-value="true" type="button">Enable</button>
+            <button class="btn-inline btn-danger" data-toggle="friendShare" data-value="false" type="button">Disable</button>
+          </div>
+        </div>
+
+        <div class="feature-toggle-row">
+          <div class="feature-toggle-info">
+            <span class="feature-toggle-name">🔺 Find your TripleMates</span>
+            <span class="msg" id="ftTripleMatesBadge" style="margin:0">Status: loading…</span>
+          </div>
+          <div class="feature-toggle-actions">
+            <button class="btn-inline" data-toggle="tripleMates" data-value="true" type="button">Enable</button>
+            <button class="btn-inline btn-danger" data-toggle="tripleMates" data-value="false" type="button">Disable</button>
+          </div>
+        </div>
+      </div>
+      <p class="input-hint" style="margin-top:14px">"Find your TripleMates" shares its on/off switch with the TripleMates tab — they always stay in sync.</p>
+      <div class="msg" id="featureTogglesMsg"></div>
     </div>
     </div>
 
@@ -1278,7 +1348,7 @@
     }
 
     // ── Dashboard tab switching ───────────────────────────────
-    const VALID_TABS = ["tags", "counters", "submissions", "shareanalytics", "courses", "triplemates"];
+    const VALID_TABS = ["tags", "counters", "features", "submissions", "shareanalytics", "courses", "triplemates"];
     function showTab(tabId) {
       if (!VALID_TABS.includes(tabId)) tabId = VALID_TABS[0];
       document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
@@ -1318,6 +1388,7 @@
           loadAnalytics();
           loadTriplemateSetting();
           loadStudentResults();
+          loadFeatureToggles();
         } else {
           showPanel("loginPanel");
           document.getElementById("logoutBtn").style.display = "none";
@@ -2173,6 +2244,53 @@ by: <strong>${escHtml(data.updatedBy || "—")}</strong>`;
         msg.className = "msg info";
         setTimeout(() => { msg.className = "msg"; }, 3000);
       } catch(e) { msg.textContent = "Failed: "+e.message; msg.className = "msg error"; }
+    });
+
+    // ── Feature visibility toggles ──────────────────────────────
+    // "tripleMates" reuses the existing triplemates/enabled path (default: disabled)
+    // so this tab and the TripleMates tab always agree. The other three default to
+    // enabled when unset, matching the student app's fail-open behavior.
+    const FEATURE_TOGGLE_PATHS = {
+      igShare:     "featureToggles/igShare",
+      fbShare:     "featureToggles/fbShare",
+      friendShare: "featureToggles/friendShare",
+      tripleMates: "triplemates/enabled"
+    };
+    const FEATURE_TOGGLE_BADGE_IDS = {
+      igShare:     "ftIgShareBadge",
+      fbShare:     "ftFbShareBadge",
+      friendShare: "ftFriendShareBadge",
+      tripleMates: "ftTripleMatesBadge"
+    };
+    function loadFeatureToggles() {
+      Object.entries(FEATURE_TOGGLE_PATHS).forEach(([key, path]) => {
+        db.ref(path).on("value", snap => {
+          const enabled = key === "tripleMates" ? snap.val() === true : snap.val() !== false;
+          const badge = document.getElementById(FEATURE_TOGGLE_BADGE_IDS[key]);
+          if (badge) {
+            badge.textContent = "Status: " + (enabled ? "ENABLED — visible to students" : "DISABLED — hidden from students");
+            badge.className = "msg " + (enabled ? "success" : "info");
+          }
+        });
+      });
+    }
+    document.querySelectorAll("[data-toggle]").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        const key   = btn.dataset.toggle;
+        const value = btn.dataset.value === "true";
+        const path  = FEATURE_TOGGLE_PATHS[key];
+        const msgEl = document.getElementById("featureTogglesMsg");
+        msgEl.className = "msg";
+        try {
+          await db.ref(path).set(value);
+          msgEl.textContent = "✓ Updated.";
+          msgEl.className = "msg success";
+          setTimeout(() => { msgEl.className = "msg"; }, 2500);
+        } catch (e) {
+          msgEl.textContent = "Update failed: " + e.message;
+          msgEl.className = "msg error";
+        }
+      });
     });
   </script>
 

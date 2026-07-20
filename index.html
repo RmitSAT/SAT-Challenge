@@ -693,6 +693,7 @@
       grid-template-columns: 1fr 1fr;
       gap: 8px;
     }
+    .story-share-row.single { grid-template-columns: 1fr; }
     .btn-share-ig {
       background: linear-gradient(135deg, #833ab4 0%, #fd1d1d 52%, #fcb045 100%);
       color: #fff;
@@ -1476,7 +1477,7 @@
         challengeFootnote: "After sharing, come back here to continue.",
         challengeNotePending: "Story challenge in progress. Share your Story to complete.",
         challengeNoteCompleted: "Challenge completed.",
-        courseCardsEyebrow: "Courses recommended for you",
+        courseCardsEyebrow: "RMIT Program For You",
         slotSpinnerLabel: "Revealing your persona…",
         squadBannerCountSuffix: "students discovered {school} with you!",
         squadBannerPre: "You're in good company —",
@@ -1573,7 +1574,7 @@
         challengeFootnote: "Sau khi chia sẻ, hãy quay lại đây để tiếp tục.",
         challengeNotePending: "Bạn đang trong thử thách Story. Hãy chia sẻ Story để hoàn tất.",
         challengeNoteCompleted: "Bạn đã hoàn thành thử thách",
-        courseCardsEyebrow: "Môn học dành cho bạn",
+        courseCardsEyebrow: "Chương trình tại RMIT dành cho bạn",
         slotSpinnerLabel: "Đang khám phá persona của bạn…",
         squadBannerCountSuffix: "học sinh cùng khám phá {school} với bạn!",
         squadBannerPre: "Bạn không đơn độc —",
@@ -1783,6 +1784,22 @@
         ? t().welcomeWithSchool.replace("{school}", typed)
         : t().welcomeDefault;
       setText("welcomeTitle", title);
+    }
+
+    // Shows/hides the IG/FB/Friend share buttons per admin-controlled feature flags.
+    function applyFeatureToggles({ igShare, fbShare, friendShare }) {
+      const igBtn      = document.getElementById("igStoryBtn");
+      const fbBtn      = document.getElementById("fbStoryBtn");
+      const shareRow   = igBtn ? igBtn.closest(".story-share-row") : null;
+      const friendBtn  = document.getElementById("friendShareBtn");
+
+      if (igBtn) igBtn.style.display = igShare ? "" : "none";
+      if (fbBtn) fbBtn.style.display = fbShare ? "" : "none";
+      if (shareRow) {
+        shareRow.style.display = (igShare || fbShare) ? "" : "none";
+        shareRow.classList.toggle("single", igShare !== fbShare);
+      }
+      if (friendBtn) friendBtn.style.display = friendShare ? "" : "none";
     }
 
     function setLanguage(lang) {
@@ -3111,6 +3128,17 @@
           _triplemateEnabled = snap.val() === true;
           const btn = document.getElementById("triplemateBtn");
           if (btn) btn.style.display = _triplemateEnabled ? "" : "none";
+        });
+
+        // Feature visibility toggles (admin-controlled) — undefined/missing means visible,
+        // so this stays fully backward-compatible with deployments that never set it.
+        db.ref("featureToggles").on("value", snap => {
+          const data = snap.val() || {};
+          applyFeatureToggles({
+            igShare:     data.igShare     !== false,
+            fbShare:     data.fbShare     !== false,
+            friendShare: data.friendShare !== false
+          });
         });
 
       } catch (e) {
