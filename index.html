@@ -1016,7 +1016,11 @@
       color: var(--navy); text-transform: uppercase;
       letter-spacing: 0.08em; margin-bottom: 10px;
     }
-    .course-cards-list { display: grid; gap: 8px; }
+    .course-cards-list {
+      display: grid; gap: 8px;
+      max-height: 320px; overflow-y: auto; padding-right: 4px;
+      scrollbar-width: thin;
+    }
     .course-card {
       display: flex; align-items: center; justify-content: space-between; gap: 10px;
       background: rgba(13, 25, 133, 0.05); border: 1.5px solid rgba(13, 25, 133, 0.12);
@@ -1364,7 +1368,7 @@
           </div>
 
           <div class="course-cards-wrap" id="courseCardsWrap" style="display:none">
-            <span class="course-cards-eyebrow" id="courseCardsEyebrow">Courses recommended for you</span>
+            <span class="course-cards-eyebrow" id="courseCardsEyebrow">RMIT Program For You</span>
             <div class="course-cards-list" id="courseCardsList"></div>
           </div>
         </div>
@@ -2824,7 +2828,7 @@
       const schoolKey = { A: "tbs", B: "scd", C: "sset" }[letter];
       const pool = coursesData[schoolKey] || [];
       if (!pool.length) { wrap.style.display = "none"; return; }
-      const shuffled = [...pool].sort(() => Math.random() - 0.5).slice(0, 3);
+      const shuffled = [...pool].sort(() => Math.random() - 0.5);
       list.innerHTML = "";
       shuffled.forEach(course => {
         const a = document.createElement("a");
