@@ -1790,8 +1790,10 @@
       setText("welcomeTitle", title);
     }
 
-    // Shows/hides the IG/FB/Friend share buttons per admin-controlled feature flags.
-    function applyFeatureToggles({ igShare, fbShare, friendShare }) {
+    // Shows/hides the IG/FB/Friend share buttons and the course-recommendation
+    // section per admin-controlled feature flags.
+    let _courseRecEnabled = true;
+    function applyFeatureToggles({ igShare, fbShare, friendShare, courseRec }) {
       const igBtn      = document.getElementById("igStoryBtn");
       const fbBtn      = document.getElementById("fbStoryBtn");
       const shareRow   = igBtn ? igBtn.closest(".story-share-row") : null;
@@ -1804,6 +1806,12 @@
         shareRow.classList.toggle("single", igShare !== fbShare);
       }
       if (friendBtn) friendBtn.style.display = friendShare ? "" : "none";
+
+      _courseRecEnabled = courseRec;
+      const resultScreen = document.getElementById("resultScreen");
+      if (resultScreen && resultScreen.classList.contains("active")) {
+        renderCourseCards(getResultLetter());
+      }
     }
 
     function setLanguage(lang) {
@@ -2825,6 +2833,7 @@
       const wrap = document.getElementById("courseCardsWrap");
       const list = document.getElementById("courseCardsList");
       if (!wrap || !list) return;
+      if (!_courseRecEnabled) { wrap.style.display = "none"; return; }
       const schoolKey = { A: "tbs", B: "scd", C: "sset" }[letter];
       const pool = coursesData[schoolKey] || [];
       if (!pool.length) { wrap.style.display = "none"; return; }
@@ -3141,7 +3150,8 @@
           applyFeatureToggles({
             igShare:     data.igShare     !== false,
             fbShare:     data.fbShare     !== false,
-            friendShare: data.friendShare !== false
+            friendShare: data.friendShare !== false,
+            courseRec:   data.courseRec   !== false
           });
         });
 

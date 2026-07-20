@@ -1016,6 +1016,17 @@
 
         <div class="feature-toggle-row">
           <div class="feature-toggle-info">
+            <span class="feature-toggle-name">🎓 Courses recommended for you</span>
+            <span class="msg" id="ftCourseRecBadge" style="margin:0">Status: loading…</span>
+          </div>
+          <div class="feature-toggle-actions">
+            <button class="btn-inline" data-toggle="courseRec" data-value="true" type="button">Enable</button>
+            <button class="btn-inline btn-danger" data-toggle="courseRec" data-value="false" type="button">Disable</button>
+          </div>
+        </div>
+
+        <div class="feature-toggle-row">
+          <div class="feature-toggle-info">
             <span class="feature-toggle-name">🔺 Find your TripleMates</span>
             <span class="msg" id="ftTripleMatesBadge" style="margin:0">Status: loading…</span>
           </div>
@@ -2248,18 +2259,20 @@ by: <strong>${escHtml(data.updatedBy || "—")}</strong>`;
 
     // ── Feature visibility toggles ──────────────────────────────
     // "tripleMates" reuses the existing triplemates/enabled path (default: disabled)
-    // so this tab and the TripleMates tab always agree. The other three default to
+    // so this tab and the TripleMates tab always agree. The others default to
     // enabled when unset, matching the student app's fail-open behavior.
     const FEATURE_TOGGLE_PATHS = {
       igShare:     "featureToggles/igShare",
       fbShare:     "featureToggles/fbShare",
       friendShare: "featureToggles/friendShare",
+      courseRec:   "featureToggles/courseRec",
       tripleMates: "triplemates/enabled"
     };
     const FEATURE_TOGGLE_BADGE_IDS = {
       igShare:     "ftIgShareBadge",
       fbShare:     "ftFbShareBadge",
       friendShare: "ftFriendShareBadge",
+      courseRec:   "ftCourseRecBadge",
       tripleMates: "ftTripleMatesBadge"
     };
     function loadFeatureToggles() {
